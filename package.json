@@ -1,14 +1,14 @@
 {
-  "name": "react-form-validator",
+  "name": "react-input-error",
   "description": "easy form validation based on schema",
   "version": "0.3.0",
   "repository": {
-    "url": "git://github.com/theporchrat/react-form-validator.git"
+    "url": "git://github.com/jquense/react-input-error.git"
   },
-  "author": "@theporchrat Jason Quense",
+  "author": "@monasticpanic Jason Quense",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/theporchrat/react-form-validator/issues"
+    "url": "https://github.com/jquense/react-input-error/issues"
   },
   "main": "index.js",
   "scripts": {
