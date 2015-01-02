@@ -1,0 +1,59 @@
+{
+  "name": "react-form-validator",
+  "description": "easy form validation based on schema",
+  "version": "0.3.0",
+  "repository": {
+    "url": "git://github.com/theporchrat/react-form-validator.git"
+  },
+  "author": "@theporchrat Jason Quense",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/theporchrat/react-form-validator/issues"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "array-uniq": "^1.0.2",
+    "es6-promise": "^2.0.1",
+    "lodash": "^2.4.1",
+    "property-expr": "^1.0.1",
+    "react": "^0.12.2",
+    "react-classset": "0.0.1",
+    "react-clonewithprops": "^1.0.1",
+    "tiny-emitter": "^1.0.0",
+    "xtend": "^4.0.0"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "chai-as-promised": "^4.1.1",
+    "concat-map": "0.0.1",
+    "convert-source-map": "^0.4.1",
+    "gulp": "^3.8.10",
+    "gulp-clean": "^0.3.1",
+    "gulp-less": "^2.0.1",
+    "gulp-plumber": "^0.6.6",
+    "gulp-react": "^2.0.0",
+    "gulp-replace": "^0.5.0",
+    "jstransform": "^8.2.0",
+    "jsx-loader": "^0.12.2",
+    "karma": "~0.12.23",
+    "karma-mocha": "~0.1.9",
+    "karma-phantomjs-launcher": "~0.1.4",
+    "karma-webpack": "~1.2.2",
+    "map": "0.0.3",
+    "mocha": "~1.21.4",
+    "phantomjs": "~1.9.10",
+    "property-expr": "^1.0.1",
+    "react-tools": "^0.12.2",
+    "react-widgets": "^2.1.0",
+    "sinon": "^1.12.2",
+    "sinon-chai": "^2.6.0",
+    "through2": "^0.6.3",
+    "validator": "^3.27.0",
+    "webpack": "^1.4.15",
+    "webpack-dev-server": "^1.7.0",
+    "yup": "^0.5.1"
+  }
+}
