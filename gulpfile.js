@@ -15,9 +15,10 @@ gulp.task('clean', function(){
     .pipe(clean())
 })
 
-gulp.task('build', ['clean'], function(){
-  gulp.src('./src/less/*.less')
+gulp.task('compile', ['clean'], function(){
+  gulp.src('./src/*.less')
     .pipe(gulp.dest('./lib/less'))
+
 
   return gulp.src(['./src/**/*.jsx', './src/**/*.js'])
       .pipe(plumber())
@@ -27,11 +28,12 @@ gulp.task('build', ['clean'], function(){
 })
 
 gulp.task('less', function(){
-  gulp.src('./src/less/validator.less')
+  gulp.src('./src/styles.less')
       .pipe(plumber())
       .pipe(less({ compress: true }))
-      .pipe(gulp.dest('./dist/css'));
+      .pipe(gulp.dest('./dist/css'))
+      .pipe(gulp.dest('./lib'));
 })
 
 
-
+gulp.task('build', [ 'compile', 'less'])
