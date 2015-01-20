@@ -41,7 +41,7 @@ var FormButton = React.createClass({
     this.validate(this.props.group, args)
       .catch( e => setTimeout( ()=>{ throw e }))
       
-    this.props.onClick && this.props.onClick.apply(this, args)
+    this.props.onClick && this.props.onClick.apply(this, { args })
   }
 
 });

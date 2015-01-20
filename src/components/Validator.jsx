@@ -14,12 +14,13 @@ var Form = React.createClass({
   },
 
   componentWillMount: function() {
-    this._validator = new Validator(this.props.onValidate)
+    this._validator = new Validator( 
+      () => this.props.onValidate.apply(this, arguments))
   },
 
-  componentWillReceiveProps: function(nextProps) {
-    this._validator.setValidator(nextProps.onValidate)
-  },
+  // componentWillReceiveProps: function(nextProps) {
+  //   this._validator.onValidate = nextProps.onValidate
+  // },
 
   getChildContext: function() {
     return { 
@@ -27,16 +28,25 @@ var Form = React.createClass({
     }
   },
 
-  render: function() {
+  render() {
     // var { children, ...props } = this.props;
     attachChildren(this.props.children, this.getChildContext())
 
     return this.props.children; 
+  },
+
+  validate(grp, args){
+    return this._validator.validate(grp, args)
+  },
+
+  validateField(name, args){
+    return this._validator.validateField(name, args)
   }
 
 });
 
 module.exports = Form;
+
 
 
 function attachChildren(children, context) {

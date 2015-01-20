@@ -55,14 +55,15 @@ var FormInput = React.createClass({
     var notify = this._notify;
 
     return this.props.events.reduce((map, evt) => {
-      map[evt] = notify.bind(null, childProps[evt])
+      map[evt] = notify.bind(null, childProps[evt], evt)
       return map
     }, {})
   },
 
-  _notify(handler, ...args){
+  _notify(handler, event, ...args){
     handler && handler.apply(this, args)
-    this.validateField(this.props.for)
+
+    this.validateField(this.props.for, { event, args})
       .catch( e => setTimeout( ()=>{ throw e }))
   }
 

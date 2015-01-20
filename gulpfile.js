@@ -7,7 +7,7 @@ var gulp = require('gulp')
   , gulpReact = require('gulp-react')
   , plumber = require('gulp-plumber');
 
-gulp.task('dev-server', dev.devServer)
+gulp.task('dev', dev.devServer)
 
 
 gulp.task('clean', function(){

@@ -9,15 +9,11 @@ class Validator extends Emitter {
 
   constructor(fn){
     super()
-    this.setValidator(fn)
+    this.onValidate = fn
     
-    this._inputs   = {}
-    this._groups   = {}
-    this._errors   = {}
-  }
-
-  setValidator(fn){
-    this._validate = fn
+    this._inputs = {}
+    this._groups = {}
+    this._errors = {}
   }
 
   register(name, group, component) {
@@ -73,7 +69,7 @@ class Validator extends Emitter {
     return !this._errors[name] || !this._errors[name].length
   }
 
-  validate(grp){
+  validate(grp, args){
     var isGroup = !(!grp || !grp.length)
       , inputs  = isGroup ? this._inputsForGroups(grp) : Object.keys(this._inputs);
 
@@ -83,12 +79,12 @@ class Validator extends Emitter {
 
     return Promise
       .all(inputs.map( 
-          key => this._validateField(key))) 
+          key => this._validateField(key, args))) 
       .then(() => this.emit('change'))
   }
 
-  validateField(name){
-    var fields = [].concat(name).map( key => this._validateField(key))
+  validateField(name, args){
+    var fields = [].concat(name).map( key => this._validateField(key, args))
 
     this._removeError(name)
 
@@ -97,12 +93,12 @@ class Validator extends Emitter {
       .then(() => this.emit('change'))
   }
 
-  _validateField(name){
+  _validateField(name, args){
     var input = this._inputs[name]
     
     return new Promise( (resolve, reject) => {
       try {
-          Promise.resolve(this._validate(name, input))
+          Promise.resolve(this.onValidate(name, input, args))
             .then(msgs => {
               msgs = msgs == null ? [] : [].concat(msgs)
               if(msgs.length) this._addError(name, msgs)
