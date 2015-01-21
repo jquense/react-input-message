@@ -1,7 +1,8 @@
 'use strict';
-var React = require('react');
-var Validator = require('../Validator')
-  , assign  = require('xtend/mutable')
+var React   = require('react');
+var assign  = require('xtend/mutable')
+  , Promise = require('es6-promise').Promise
+  , uniq    = require('array-uniq')
 
 var Form = React.createClass({
 
@@ -10,22 +11,83 @@ var Form = React.createClass({
   },
 
   childContextTypes: {
-    validator: React.PropTypes.instanceOf(Validator)
+    validate:        React.PropTypes.func,
+    validateField:   React.PropTypes.func,
+    onFieldValidate: React.PropTypes.func,
+    errors:          React.PropTypes.func,
+    register:        React.PropTypes.func,
+    unregister:      React.PropTypes.func
   },
 
   componentWillMount: function() {
-    this._validator = new Validator( 
-      () => this.props.onValidate.apply(this, arguments))
+    this._inputs = {}
+    this._groups = {}
+    this._errors = {}
   },
 
   // componentWillReceiveProps: function(nextProps) {
   //   this._validator.onValidate = nextProps.onValidate
   // },
 
+  getInitialState: function() {
+    return {
+      errors: {}
+    };
+  },
+
   getChildContext: function() {
+
     return { 
-      validator: this._validator
+      errors:        this.errors,
+      validate:      this._onValidate,
+      validateField: this._onFieldValidate,
+
+      register: (name, group, component) => {
+        if( arguments.length === 2)
+          component = group, group = null;
+
+        this._inputs[name] = component
+
+        if( !(!group || !group.length))
+          [].concat(group).forEach( grp => {
+            if( !this._groups.hasOwnProperty(grp) )
+              return (this._groups[grp] = [name])
+
+            if( this._groups[grp].indexOf(name) === -1)
+              this._groups[grp].push(name)
+          })
+      },
+
+      onFieldValidate: (field, event, args) => {
+        var prevented = false;
+
+        this.props.onValidate &&
+          this.props.onValidate({ 
+            event, field, args,
+            input: this._inputs[field], 
+            preventDefault(){ prevented = true } 
+          })
+
+        if( !prevented)
+          this.validateField(field)
+            .catch( e => setTimeout( ()=>{ throw e }))
+      },
+
+      unregister: (name, grp) => {
+        var remove = (name, grp) => {
+              var idx = this._groups[grp].indexOf(name)
+              if(idx !== -1 ) this._groups[grp].splice(idx, 1)
+            };
+
+        if(grp) return remove(name, grp)
+
+        for(var key in this._groups) if (this._groups.hasOwnProperty(key))
+          remove(name, key)
+
+        delete this._inputs[name]
+      }
     }
+
   },
 
   render() {
@@ -35,12 +97,81 @@ var Form = React.createClass({
     return this.props.children; 
   },
 
+  errors(names){
+    if( (!names || !names.length) )
+      return assign({}, this._errors)
+
+    return [].concat(names).reduce( (o, name) => {
+      if( this._errors[name]) 
+        o[name] = this._errors[name]
+
+      return o
+    }, {})
+  },
+
+  isValid(name){
+    return !this._errors[name] || !this._errors[name].length
+  },
+
   validate(grp, args){
-    return this._validator.validate(grp, args)
+    var isGroup = !(!grp || !grp.length)
+      , inputs  = isGroup ? this._inputsForGroups(grp) : Object.keys(this._inputs);
+
+    isGroup 
+      ? this._removeError(inputs) 
+      : (this._errors = {})
+
+    return Promise
+      .all(inputs.map( 
+          key => this._validateField(key, args))) 
+      .then(() => {
+        this.forceUpdate() 
+      })
   },
 
   validateField(name, args){
-    return this._validator.validateField(name, args)
+    var fields = [].concat(name).map( key => this._validateField(key, args))
+
+    this._removeError(name)
+
+    return Promise
+      .all(fields) 
+      .then(() => {
+        this.forceUpdate() 
+      })
+  },
+
+  _validateField(name, args){
+    var input = this._inputs[name]
+    
+    return new Promise( (resolve, reject) => {
+      try {
+          Promise.resolve(this.props.validate(name, input, args))
+            .then(msgs => {
+              msgs = msgs == null ? [] : [].concat(msgs)
+              if(msgs.length) this._addError(name, msgs)
+              resolve(!msgs.length)
+            })
+            .catch(reject)
+      } 
+      catch(err) {
+        reject(err)
+      }
+    });
+  },
+
+  _addError(name, msgs){
+    this._errors[name] = msgs
+  },
+
+  _removeError(fields){
+    [].concat(fields)
+      .forEach( field => delete this._errors[field])
+  },
+
+  _inputsForGroups(grps){
+    return uniq([].concat(grps).reduce( 
+      (g, grp) => g.concat(this._groups[grp]), []))
   }
 
 });

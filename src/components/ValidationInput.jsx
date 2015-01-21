@@ -6,7 +6,6 @@ var React = require('react')
 var FormInput = React.createClass({
 
   mixins: [ 
-    require('./ValidationTriggerMixin'),
     require('./ValidationListenerMixin')
   ],
 
@@ -20,6 +19,12 @@ var FormInput = React.createClass({
             ])
   },
 
+  contextTypes: {
+    onFieldValidate: React.PropTypes.func,
+    register:        React.PropTypes.func,
+    unregister:      React.PropTypes.func
+  },
+
   getDefaultProps: function() {
     return {
       events: [ 'onChange' ],
@@ -27,18 +32,19 @@ var FormInput = React.createClass({
     };
   },
 
+
   componentWillMount(){
-    this.context.validator.register(this.props.for, this.props.group, this)
+    this.context.register(this.props.for, this.props.group, this)
   },
 
   componentWillUnmount() {
-    this.context.validator.unregister(this.props.for)
+    this.context.unregister(this.props.for)
   },
 
   componentWillReceiveProps(nextProps) {
     // in case anything has changed
-    this.context.validator.unregister(this.props.for)
-    this.context.validator.register(nextProps.for, nextProps.group, this)
+    this.context.unregister(this.props.for)
+    this.context.register(nextProps.for, nextProps.group, this)
   },
 
   render() {
@@ -63,8 +69,7 @@ var FormInput = React.createClass({
   _notify(handler, event, ...args){
     handler && handler.apply(this, args)
 
-    this.validateField(this.props.for, { event, args})
-      .catch( e => setTimeout( ()=>{ throw e }))
+    this.context.onFieldValidate(this.props.for, event, args)
   }
 
 });

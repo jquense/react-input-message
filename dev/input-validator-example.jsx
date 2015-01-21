@@ -41,9 +41,13 @@ var App = React.createClass({
   render(){
     var model = this.state; // the data to bind to the form
     
+    function onvalidate(...args){
+      console.log(args)
+    }
+
     return (
       <div style={{ width: 400 }}>
-        <Validator onValidate={this.validate}>
+        <Validator validate={this.validate} onValidate={onvalidate}>
           <form className='form-horizontal' >
             <fieldset>
               <legend>Personal</legend>

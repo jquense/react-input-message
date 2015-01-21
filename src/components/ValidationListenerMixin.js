@@ -12,25 +12,19 @@ module.exports = {
   },
 
   contextTypes: {
-    validator: React.PropTypes.instanceOf(Validator)
+    errors:         React.PropTypes.func
   },
 
-  componentWillMount() {
-    this._change = () => this.setState(this._getValidationState())
-    this.context.validator
-      .on('change',this._change )  
-  },
-
-  componentWillUnmount() {
-    this.context.validator.off('change', this._change)
+  componentWillReceiveProps: function(nextProps) {
+    this.setState(this._getValidationState(this.context))
   },
 
   getInitialState(){
-    return this._getValidationState()
+    return this._getValidationState(this.context)
   },
 
-  _getValidationState(){
-    var errors = this.context.validator.errors(this.props.for);
+  _getValidationState(ctx){
+    var errors = ctx.errors(this.props.for);
 
     return { 
       errors: errors,
