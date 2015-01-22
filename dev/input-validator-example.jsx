@@ -41,8 +41,9 @@ var App = React.createClass({
   render(){
     var model = this.state; // the data to bind to the form
     
-    function onvalidate(...args){
-      console.log(args)
+    function onvalidate(e){
+      e.preventDefault()
+      console.log(e)
     }
 
     return (

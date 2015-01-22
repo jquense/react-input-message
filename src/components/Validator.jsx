@@ -7,7 +7,8 @@ var assign  = require('xtend/mutable')
 var Form = React.createClass({
 
   propTypes: {
-    onValidate: React.PropTypes.func.isRequired
+    onValidate: React.PropTypes.func,
+    validate:   React.PropTypes.func.isRequired
   },
 
   childContextTypes: {
@@ -16,18 +17,16 @@ var Form = React.createClass({
     onFieldValidate: React.PropTypes.func,
     errors:          React.PropTypes.func,
     register:        React.PropTypes.func,
-    unregister:      React.PropTypes.func
+    unregister:      React.PropTypes.func,
+    listen:          React.PropTypes.func
   },
 
   componentWillMount: function() {
-    this._inputs = {}
-    this._groups = {}
-    this._errors = {}
+    this._inputs   = {}
+    this._groups   = {}
+    this._errors   = {}
+    this._handlers = []
   },
-
-  // componentWillReceiveProps: function(nextProps) {
-  //   this._validator.onValidate = nextProps.onValidate
-  // },
 
   getInitialState: function() {
     return {
@@ -39,8 +38,13 @@ var Form = React.createClass({
 
     return { 
       errors:        this.errors,
-      validate:      this._onValidate,
-      validateField: this._onFieldValidate,
+      validate:      this.validate,
+      validateField: this.validateField,
+
+      listen: fn => {
+        this._handlers.push(fn)
+        return () => this._handlers.splice(this._handlers.indexOf(fn), 1)
+      },
 
       register: (name, group, component) => {
         if( arguments.length === 2)
@@ -113,6 +117,10 @@ var Form = React.createClass({
     return !this._errors[name] || !this._errors[name].length
   },
 
+  _emit: function(){
+    this._handlers.forEach(fn => fn())
+  },
+
   validate(grp, args){
     var isGroup = !(!grp || !grp.length)
       , inputs  = isGroup ? this._inputsForGroups(grp) : Object.keys(this._inputs);
@@ -124,9 +132,7 @@ var Form = React.createClass({
     return Promise
       .all(inputs.map( 
           key => this._validateField(key, args))) 
-      .then(() => {
-        this.forceUpdate() 
-      })
+      .then(() => this._emit())
   },
 
   validateField(name, args){
@@ -136,9 +142,7 @@ var Form = React.createClass({
 
     return Promise
       .all(fields) 
-      .then(() => {
-        this.forceUpdate() 
-      })
+      .then(() => this._emit())
   },
 
   _validateField(name, args){

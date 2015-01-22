@@ -1,6 +1,6 @@
 'use strict';
-var React = require('react')
-  , assign  = require('xtend/mutable')
+var React  = require('react')
+  , assign = require('xtend/mutable')
 
 var FormButton = React.createClass({
 
@@ -16,7 +16,7 @@ var FormButton = React.createClass({
     group:  React.PropTypes.oneOfType([
               React.PropTypes.string,
               React.PropTypes.arrayOf(React.PropTypes.string)
-            ]).isRequired
+            ])
   },
 
   getDefaultProps: function() {
