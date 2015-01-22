@@ -42,7 +42,7 @@ var App = React.createClass({
     var model = this.state; // the data to bind to the form
     
     function onvalidate(e){
-      e.preventDefault()
+      //e.preventDefault()
       console.log(e)
     }
 

@@ -149,18 +149,13 @@ var Form = React.createClass({
     var input = this._inputs[name]
     
     return new Promise( (resolve, reject) => {
-      try {
-          Promise.resolve(this.props.validate(name, input, args))
-            .then(msgs => {
-              msgs = msgs == null ? [] : [].concat(msgs)
-              if(msgs.length) this._addError(name, msgs)
-              resolve(!msgs.length)
-            })
-            .catch(reject)
-      } 
-      catch(err) {
-        reject(err)
-      }
+      Promise.resolve(this.props.validate(name, input, args))
+        .then(msgs => {
+          msgs = msgs == null ? [] : [].concat(msgs)
+          if(msgs.length) this._addError(name, msgs)
+          resolve(!msgs.length)
+        })
+        .catch(reject)
     });
   },
 
