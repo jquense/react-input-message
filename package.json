@@ -20,11 +20,9 @@
     "es6-promise": "^2.0.1",
     "property-expr": "^1.0.1",
     "react": "^0.13.0-rc1",
-    "react-classset": "0.0.1",
-    "react-clonewithprops": "^1.0.1",
-    "tiny-emitter": "^1.0.0",
-    "xtend": "^4.0.0"
+    "tiny-emitter": "^1.0.0"
   },
+  
   "devDependencies": {
     "property-expr": "^1.0.1",
     "react-widgets": "^2.1.0",
