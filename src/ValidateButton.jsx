@@ -1,11 +1,10 @@
 'use strict';
 var React  = require('react')
-  , assign = require('xtend/mutable')
 
 var FormButton = React.createClass({
 
   mixins: [ 
-    require('./ValidationTriggerMixin') 
+    require('./mixins/ValidationTrigger') 
   ],
 
   propTypes: {
@@ -33,7 +32,7 @@ var FormButton = React.createClass({
 
     return React.createElement(
         component
-      , assign(props, { onClick: this._click })
+      , { ...props, onClick: this._click }
       , children);
   },
 

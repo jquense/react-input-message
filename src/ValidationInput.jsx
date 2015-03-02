@@ -1,22 +1,22 @@
 'use strict';
 var React = require('react')
-  , cwp = require('react-clonewithprops')
-  , assign = require('xtend');
+  , classnames = require('classnames')
+  , { cloneAndReplaceProps } = require('react/lib/ReactElement');
 
-var FormInput = React.createClass({displayName: "FormInput",
+var FormInput = React.createClass({
 
   mixins: [ 
-    require('./ValidationListenerMixin')
+    require('./mixins/ValidationListener')
   ],
 
   propTypes: {
-    events: React.PropTypes.arrayOf(React.PropTypes.string),
+    events:     React.PropTypes.arrayOf(React.PropTypes.string),
     errorClass: React.PropTypes.string,
-    for:    React.PropTypes.string.isRequired,
-    group:  React.PropTypes.oneOfType([
-              React.PropTypes.string,
-              React.PropTypes.arrayOf(React.PropTypes.string)
-            ])
+    for:        React.PropTypes.string.isRequired,
+    group:      React.PropTypes.oneOfType([
+                  React.PropTypes.string,
+                  React.PropTypes.arrayOf(React.PropTypes.string)
+                ])
   },
 
   contextTypes: {
@@ -33,40 +33,44 @@ var FormInput = React.createClass({displayName: "FormInput",
   },
 
 
-  componentWillMount:function(){
+  componentWillMount(){
     this.context.register(this.props.for, this.props.group, this)
   },
 
-  componentWillUnmount:function() {
+  componentWillUnmount() {
     this.context.unregister(this.props.for)
   },
 
-  componentWillReceiveProps:function(nextProps) {
+  componentWillReceiveProps(nextProps) {
     // in case anything has changed
     this.context.unregister(this.props.for)
     this.context.register(nextProps.for, nextProps.group, this)
   },
 
-  render:function() {
+  render() {
     var child = React.Children.only(this.props.children);
 
-    return cwp(child, assign(this._events(child.props), {
+    return cloneAndReplaceProps(child, { 
+      ...child.props, 
+      ...this._events(child.props),
       name: this.props.for,
-      ref:  child.ref,
-      className: 'rv-form-input' + (!this.state.valid ? (' ' + this.props.errorClass) : '')
-    }))
+      className: classnames(child.props.className, 'rv-form-input', { 
+        
+        [this.props.errorClass]: !this.state.valid 
+      })
+    })
   },
 
   _events: function(childProps){
     var notify = this._notify;
 
-    return this.props.events.reduce(function(map, evt)  {
+    return this.props.events.reduce((map, evt) => {
       map[evt] = notify.bind(null, childProps[evt], evt)
       return map
     }, {})
   },
 
-  _notify:function(handler, event ){for (var args=[],$__0=2,$__1=arguments.length;$__0<$__1;$__0++) args.push(arguments[$__0]);
+  _notify(handler, event, ...args){
     handler && handler.apply(this, args)
 
     this.context.onFieldValidate(this.props.for, event, args)

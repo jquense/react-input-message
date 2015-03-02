@@ -1,10 +1,13 @@
 'use strict';
-var React   = require('react');
-var assign  = require('xtend/mutable')
-  , Promise = require('es6-promise').Promise
+var React   = require('react')
+  , ReactElement = require('react/lib/ReactElement');
+
+var Promise = require('es6-promise').Promise
   , uniq    = require('array-uniq')
 
-var Form = React.createClass({
+module.exports = React.createClass({
+
+  displayName: 'Validator',
 
   propTypes: {
     onValidate: React.PropTypes.func,
@@ -21,22 +24,34 @@ var Form = React.createClass({
     listen:          React.PropTypes.func
   },
 
-  componentWillMount: function() {
+  componentWillMount() {
     this._inputs   = {}
     this._groups   = {}
     this._errors   = {}
     this._handlers = []
   },
 
-  getInitialState: function() {
+  getInitialState() {
     return {
-      errors: {}
+      errors: {},
+      children: attachChildren(
+          React.Children.only(this.props.children)
+        , this.getChildContext())
     };
   },
 
-  getChildContext: function() {
+  componentWillReceiveProps(nextProps){
+    this.setState({ 
+      children: attachChildren(
+          React.Children.only(nextProps.children)
+        , this.getChildContext())
+    })
+  },
 
-    return { 
+  getChildContext() {
+
+    // cache the value to avoid the damn owner/parent context warnings. TODO: remove in 0.14
+    return this._context || (this._context = { 
       errors:        this.errors,
       validate:      this.validate,
       validateField: this.validateField,
@@ -74,7 +89,7 @@ var Form = React.createClass({
 
         if( !prevented)
           this.validateField(field)
-            .catch( e => setTimeout( ()=>{ throw e }))
+            .catch( e => setTimeout(()=>{ throw e }))
       },
 
       unregister: (name, grp) => {
@@ -90,20 +105,16 @@ var Form = React.createClass({
 
         delete this._inputs[name]
       }
-    }
-
+    })
   },
 
   render() {
-    // var { children, ...props } = this.props;
-    attachChildren(this.props.children, this.getChildContext())
-
-    return this.props.children; 
+    return this.state.children
   },
 
   errors(names){
     if( (!names || !names.length) )
-      return assign({}, this._errors)
+      return { ...this._errors }
 
     return [].concat(names).reduce( (o, name) => {
       if( this._errors[name]) 
@@ -117,7 +128,7 @@ var Form = React.createClass({
     return !this._errors[name] || !this._errors[name].length
   },
 
-  _emit: function(){
+  _emit(){
     this._handlers.forEach(fn => fn())
   },
 
@@ -175,20 +186,30 @@ var Form = React.createClass({
 
 });
 
-module.exports = Form;
-
-
-
 function attachChildren(children, context) {
-  React.Children.forEach(children, child => {
-    if( !React.isValidElement(child) ) 
-      return 
 
-    if( child.type.contextTypes )
-      assign(child._context, context)
-    
-    if ( child.props.children) 
-      attachChildren(child.props.children, context)
-  });
+  if ( typeof children === 'string' || React.isValidElement(children))
+    return clone(children)
+
+  return React.Children.map(children, clone)
+
+  function clone (child) {
+    var props = child.props
+
+    if ( !React.isValidElement(child))
+      return child;
+
+
+    if ( props.children )
+      props = { ...child.props, children: attachChildren(props.children, context) }
+
+    return new ReactElement(
+      child.type,
+      child.key,
+      child.ref,
+      child._owner,
+      { ...child._context, ...context},
+      props
+    )
+  }
 }
-

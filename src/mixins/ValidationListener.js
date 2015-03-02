@@ -15,20 +15,20 @@ module.exports = {
     listen: React.PropTypes.func
   },
 
-  getInitialState:function(){
+  getInitialState() {
     return this._getValidationState(this.context)
   },
 
-  componentWillMount:function() {
+  componentWillMount() {
     this._removeChangeListener = this.context
-      .listen(function()  {return this.setState(this._getValidationState());}.bind(this))  
+      .listen(() => this.setState(this._getValidationState()))  
   },
 
-  componentWillUnmount:function() {
+  componentWillUnmount() {
     this._removeChangeListener()
   },
 
-  _getValidationState:function(){
+  _getValidationState(){
     var errors = this.context.errors(this.props.for);
 
     return { 

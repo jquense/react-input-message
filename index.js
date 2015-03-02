@@ -1,12 +1,12 @@
 'use strict';
 
 module.exports = {
-  Validator: require('./lib/components/ValidationInput'),
-  ValidationInput: require('./lib/components/ValidationInput'),
-  ValidationButton: require('./lib/components/ValidationButton'),
-  ValidationMessage: require('./lib/components/ValidationMessage'),
+  Validator: require('./lib/ValidationInput'),
+  ValidationInput: require('./lib/ValidationInput'),
+  ValidationButton: require('./lib/ValidationButton'),
+  ValidationMessage: require('./lib/ValidationMessage'),
 
-  ValidationListenerMixin: require('./lib/components/ValidationListenerMixin'),
-  ValidationTriggerMixin:  require('./lib/components/ValidationTriggerMixin'),
+  ValidationListenerMixin: require('./lib/mixins/ValidationListener'),
+  ValidationTriggerMixin:  require('./lib/mixins/ValidationTrigger'),
 }
 

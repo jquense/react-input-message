@@ -1,9 +1,9 @@
 'use strict';
 var React = require('react/addons')
-var Validator = require('../src/components/Validator.jsx')
-var FormInput = require('../src/components/ValidationInput.jsx')
-var FormButton = require('../src/components/ValidateButton.jsx')
-var ValidationMessage = require('../src/components/ValidationMessage.jsx')
+var Validator = require('../src/Validator.jsx')
+var FormInput = require('../src/ValidationInput.jsx')
+var FormButton = require('../src/ValidateButton.jsx')
+var ValidationMessage = require('../src/ValidationMessage.jsx')
 var RW = require('react-widgets')
 var assign = require('xtend')
 
@@ -49,7 +49,7 @@ var App = React.createClass({
       , setpath = setter(path)
 
     return function(val){
-      var s = assign(self.state); // copy state so we can update without mutating
+      var s = self.state; // copy state so we can update without mutating
 
       if( val && val.target) // in case we got a `SyntheticEvent` object 
         val = val.target.value

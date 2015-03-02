@@ -1,9 +1,9 @@
 'use strict';
 var React = require('react');
 
-var ValidationMessage = React.createClass({displayName: "ValidationMessage",
+var ValidationMessage = React.createClass({
 
-  mixins: [ require('./ValidationListenerMixin') ],
+  mixins: [ require('./mixins/ValidationListener') ],
 
   propTypes: {
     for: React.PropTypes.oneOfType([
@@ -12,18 +12,18 @@ var ValidationMessage = React.createClass({displayName: "ValidationMessage",
          ]).isRequired
   },
 
-  getDefaultProps:function() {
+  getDefaultProps() {
     return {
       component: 'span'
     }
   },
 
-  render:function() {
+  render() {
     var classes = 'rv-validation-message'
       , errors = this.state.errors;
 
     errors = Object.keys(errors)
-        .reduce( function(errs, grp)  {return errs.concat(errors[grp]);}, []);
+        .reduce( (errs, grp) => errs.concat(errors[grp]), []);
 
     if (!this.state.valid)
       classes += ' field-error'
