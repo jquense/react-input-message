@@ -4,15 +4,11 @@ var React = require('react');
 module.exports = {
 
   contextTypes: {
-    validate:       React.PropTypes.func,
-    validateField:  React.PropTypes.func,
+    onValidateGroup: React.PropTypes.func,
+    onValidateField: React.PropTypes.func,
   },
 
-  validate(grp, args){
-    return this.context.validate(grp, args)
-  },
-
-  validateField(name, args){
-    return this.context.validateField(name, args)
+  getParentContext(){
+    return this._reactInternalInstance._context
   }
 }

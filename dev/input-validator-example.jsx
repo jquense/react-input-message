@@ -1,6 +1,7 @@
 'use strict';
 var React = require('react/addons')
-var Validator = require('../src/Validator.jsx')
+var Validator = require('../src/Validator')
+var ValidationContainer = require('../src/ValidationContainer.jsx')
 var FormInput = require('../src/ValidationInput.jsx')
 var FormButton = require('../src/ValidateButton.jsx')
 var ValidationMessage = require('../src/ValidationMessage.jsx')
@@ -28,25 +29,52 @@ var App = React.createClass({
   getInitialState: function(){
     // create an empty model for the initial value
     return {
-      personal: {},
-      trivia: {}
+      validator: new Validator(this.validate),
+      trivia: {},
+      personal: {}
     }
+  },
+
+  _queueValidation(path){
+    var queue = this._queue || (this._queue = [])
+
+    if (queue.indexOf(path) === -1)
+      queue.push(path)
+  },
+
+  _flushValidations(){
+    var validator = this.state.validator
+      , queue = this._queue || []
+      , input;
+
+    Promise.all(queue, input => validator.validateField(input.props.for, input.props))
+      .then( () => this.setState({ errors: this.state.validator.errors() }))
+    
+    this._queue = []
   },
 
   /*
    *  Lets render a form that validates based on rules specified per input
    */
   render(){
-    var model = this.state; // the data to bind to the form
+    var self = this
+      , model = this.state; // the data to bind to the form
     
-    function onvalidate(e){
-      //e.preventDefault()
-      console.log(e)
+    function onValidate(e){
+      if( e.event === 'onChange')
+        return self._queueValidation(e.target)
+      
+      self.state.validator.validateField(e.field, e.target.props)
     }
 
     return (
       <div style={{ width: 400 }}>
-        <Validator validate={this.validate} onValidate={onvalidate}>
+        <ValidationContainer 
+          errors={this.state.errors}
+          validator={this.state.validator}
+          onValidate={onValidate}
+        >
+
           <form className='form-horizontal' >
             <fieldset>
               <legend>Personal</legend>
@@ -104,7 +132,7 @@ var App = React.createClass({
               </div>
             </fieldset>
           </form>
-        </Validator>
+        </ValidationContainer>
       </div>
     )
   },
@@ -112,13 +140,11 @@ var App = React.createClass({
   /*
   * This is the callback used by the validator component
   */
-  validate( path, input) {
+  validate(path, { validations, messages }) {
     // The state is updated by widgets, but isn't always synchronous so we check _pendingState first
     var value = getter(path)(this._pendingState || this.state );
 
-    var validations = input.props.validations // validations we specified below
-      , messages = input.props.messages
-      , valid, error;
+    var valid, error;
 
     valid = validations.every( (method, idx) => {
       var valid =  validator[method](value)
@@ -143,7 +169,7 @@ var App = React.createClass({
         val = val.target.value
 
       setpath(self.state, val)
-      self.setState(self.state)
+      self.setState(self.state, () => self._flushValidations())
     }
   },
 })

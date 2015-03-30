@@ -6,6 +6,7 @@ var config = {
       whitelist: [
         'es6.classes',
         'es6.modules',
+        'es6.spread',
         'es6.blockScoping',
         'es6.arrowFunctions',
         'es6.properties.computed',

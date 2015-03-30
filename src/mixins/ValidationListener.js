@@ -15,13 +15,15 @@ module.exports = {
     listen: React.PropTypes.func
   },
 
-  getInitialState() {
-    return this._getValidationState(this.context)
+  getParentContext(){
+    return this._reactInternalInstance._context
   },
 
   componentWillMount() {
-    this._removeChangeListener = this.context
+    this._removeChangeListener = this.getParentContext()
       .listen(() => this.setState(this._getValidationState()))  
+
+    this.setState(this._getValidationState())
   },
 
   componentWillUnmount() {
@@ -29,7 +31,7 @@ module.exports = {
   },
 
   _getValidationState(){
-    var errors = this.context.errors(this.props.for);
+    var errors = this.getParentContext().errors(this.props.for);
 
     return { 
       errors: errors,

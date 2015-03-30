@@ -34,26 +34,30 @@ var FormInput = React.createClass({
 
 
   componentWillMount(){
-    this.context.register(this.props.for, this.props.group, this)
+    this.getParentContext().register(this.props.for, this.props.group)
   },
 
   componentWillUnmount() {
-    this.context.unregister(this.props.for)
+    this.getParentContext().unregister(this.props.for)
   },
 
   componentWillReceiveProps(nextProps) {
     // in case anything has changed
-    this.context.unregister(this.props.for)
-    this.context.register(nextProps.for, nextProps.group, this)
+    this.getParentContext().unregister(this.props.for)
+    this.getParentContext().register(nextProps.for, nextProps.group)
   },
 
   render() {
     var child = React.Children.only(this.props.children);
 
     return cloneAndReplaceProps(child, { 
+
       ...child.props, 
+
       ...this._events(child.props),
+
       name: this.props.for,
+      
       className: classnames(child.props.className, 'rv-form-input', { 
         
         [this.props.errorClass]: !this.state.valid 
@@ -73,7 +77,7 @@ var FormInput = React.createClass({
   _notify(handler, event, ...args){
     handler && handler.apply(this, args)
 
-    this.context.onFieldValidate(this.props.for, event, args)
+    this.getParentContext().onValidateField(this.props.for, event, this, args)
   }
 
 });
