@@ -76,8 +76,7 @@ module.exports = class ValidationContainer extends React.Component {
       },
 
       onValidateGroup: (group, event, target, args) => {
-        var isGroup = !(!group || !group.length)
-          , inputs  = isGroup ? this._fieldsForGroups(group) : Object.keys(this._fields);
+        var inputs = this.fields(group);
 
         inputs.forEach( field => {
           this.props.onValidationNeeded &&
@@ -120,13 +119,18 @@ module.exports = class ValidationContainer extends React.Component {
     return this.state.children
   }
 
-  _emit(){
-    this._handlers.forEach(fn => fn())
+  fields(groups){
+    var isGroup = !(!groups || !groups.length)
+
+    groups = [].concat(groups)
+
+    return isGroup 
+      ? uniq(groups.reduce((fields, group) => fields.concat(this._groups[group]), []))
+      : Object.keys(this._fields);
   }
 
-  _fieldsForGroups(grps){
-    return uniq([].concat(grps).reduce( 
-      (g, grp) => g.concat(this._groups[grp]), []))
+  _emit(){
+    this._handlers.forEach(fn => fn())
   }
 
   _messages(names){
