@@ -1,12 +1,13 @@
 'use strict';
 
 module.exports = {
-  Validator: require('./lib/ValidationInput'),
-  ValidationInput: require('./lib/ValidationInput'),
-  ValidationButton: require('./lib/ValidationButton'),
-  ValidationMessage: require('./lib/ValidationMessage'),
+  Validator: require('./lib/Validator'),
 
-  ValidationListenerMixin: require('./lib/mixins/ValidationListener'),
-  ValidationTriggerMixin:  require('./lib/mixins/ValidationTrigger'),
+  MessageSource: require('./lib/MessageSource'),
+  MessageTrigger:  require('./lib/MessageTrigger'),
+  MessageContainer: require('./lib/MessageContainer'),
+  Message: require('./lib/Message'),
+
+  connectToMessageContainer:  require('./lib/connectToMessageContainer')
 }
 

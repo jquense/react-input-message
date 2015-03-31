@@ -1,14 +1,14 @@
 {
-  "name": "react-input-error",
-  "description": "easy form validation based on schema",
+  "name": "react-input-message",
+  "description": "unopinionated form input annotation",
   "version": "0.3.0",
   "repository": {
-    "url": "git://github.com/jquense/react-input-error.git"
+    "url": "git://github.com/jquense/react-input-message.git"
   },
   "author": "@monasticpanic Jason Quense",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jquense/react-input-error/issues"
+    "url": "https://github.com/jquense/react-input-message/issues"
   },
   "main": "index.js",
   "scripts": {
@@ -18,11 +18,13 @@
     "array-uniq": "^1.0.2",
     "classnames": "^1.1.4",
     "es6-promise": "^2.0.1",
-    "property-expr": "^1.0.1",
-    "react": "^0.13.0",
-    "tiny-emitter": "^1.0.0",
     "uncontrollable": "^1.1.3"
   },
+
+  "peerDependencies": {
+    "react": "^0.13.0"
+  },
+
   "devDependencies": {
     "property-expr": "^1.0.1",
     "react-widgets": "^2.1.0",

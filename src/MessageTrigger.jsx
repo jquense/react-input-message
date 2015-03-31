@@ -1,11 +1,7 @@
 'use strict';
 var React  = require('react')
 
-var FormButton = React.createClass({
-
-  mixins: [ 
-    require('./mixins/ValidationTrigger') 
-  ],
+var MessageTrigger = React.createClass({
 
   propTypes: {
     component: React.PropTypes.oneOfType([
@@ -18,7 +14,18 @@ var FormButton = React.createClass({
             ])
   },
 
-  getDefaultProps: function() {
+  contextTypes: {
+    onValidateGroup: React.PropTypes.func,
+    onValidateField: React.PropTypes.func,
+  },
+
+  getContext(){
+    return process.env.NODE_ENV !== 'production' 
+      ? this.context
+      : this._reactInternalInstance._context
+  },
+
+  getDefaultProps() {
     return {
       component: 'button'
     }
@@ -37,7 +44,7 @@ var FormButton = React.createClass({
   },
 
   _click(...args){
-    this.getParentContext().onValidateGroup(this.props.group, 'click', this, args)
+    this.getContext().onValidateGroup(this.props.group, 'click', this, args)
       
     this.props.onClick 
       && this.props.onClick(...args)
@@ -45,4 +52,4 @@ var FormButton = React.createClass({
 
 });
 
-module.exports = FormButton;
+module.exports = MessageTrigger;

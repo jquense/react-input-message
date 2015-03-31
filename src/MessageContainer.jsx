@@ -9,21 +9,24 @@ var Promise = require('es6-promise').Promise
 module.exports = class ValidationContainer extends React.Component {
 
   static defaultProps = {
-    errors: []
+    messages: []
   }
 
   static propTypes = {
-    errors:     React.PropTypes.array,
-    onValidate: React.PropTypes.func.isRequired
+    messages:           React.PropTypes.array,
+    onValidationNeeded: React.PropTypes.func.isRequired
   }
 
   static childContextTypes = {
 
     onValidateField: React.PropTypes.func,
     onValidateGroup: React.PropTypes.func,
-    errors:          React.PropTypes.func,
+
+    messages:        React.PropTypes.func,
+
     register:        React.PropTypes.func,
     unregister:      React.PropTypes.func,
+
     listen:          React.PropTypes.func
   }
 
@@ -36,17 +39,13 @@ module.exports = class ValidationContainer extends React.Component {
     this._fields = Map ? new Map() : Object.create(null)
 
     this.state = {
-      children: attachChildren(
-          React.Children.only(props.children)
-        , this.getChildContext())
+      children: getChildren(props, this.getChildContext())
     };
   }
 
   componentWillReceiveProps(nextProps){
     this.setState({ 
-      children: attachChildren(
-          React.Children.only(nextProps.children)
-        , this.getChildContext())
+      children: getChildren(nextProps, this.getChildContext())
     })
   }
 
@@ -59,22 +58,21 @@ module.exports = class ValidationContainer extends React.Component {
     // cache the value to avoid the damn owner/parent context warnings. TODO: remove in 0.14
     return this._context || (this._context = {
 
-      errors: this._errors.bind(this),
+      messages: this._messages.bind(this),
 
-      listen: fn => {
+      listen: (fn) => {
         this._handlers.push(fn)
         return () => this._handlers.splice(this._handlers.indexOf(fn), 1)
       },
 
-      register: (name, group, target) => 
-        this.addField(name, group, target),
+      register: (name, group, target) => {
+        this.addField(name, group, target)
+        return this.removeField.bind(this, name, group)
+      },
       
-      unregister: (name, group) =>  
-        this.removeField(name, group),
-
       onValidateField: (field, event, target, args) => {
-        this.props.onValidate &&
-          this.props.onValidate({ event, field, args, target })
+        this.props.onValidationNeeded &&
+          this.props.onValidationNeeded({ event, field, args, target })
       },
 
       onValidateGroup: (group, event, target, args) => {
@@ -82,8 +80,8 @@ module.exports = class ValidationContainer extends React.Component {
           , inputs  = isGroup ? this._fieldsForGroups(group) : Object.keys(this._fields);
 
         inputs.forEach( field => {
-          this.props.onValidate &&
-            this.props.onValidate({ event, field, args, target: this._fields[field] })
+          this.props.onValidationNeeded &&
+            this.props.onValidationNeeded({ event, field, args, target: this._fields[field] })
         })
       }
     })
@@ -119,7 +117,7 @@ module.exports = class ValidationContainer extends React.Component {
   }
 
   render() {
-    return this.props.children
+    return this.state.children
   }
 
   _emit(){
@@ -131,18 +129,28 @@ module.exports = class ValidationContainer extends React.Component {
       (g, grp) => g.concat(this._groups[grp]), []))
   }
 
-  _errors(names){
+  _messages(names){
     if( (!names || !names.length) )
-      return { ...this.props.errors }
+      return { ...this.props.messages }
 
     return [].concat(names).reduce( (o, name) => {
-      if( this.props.errors[name]) 
-        o[name] = this.props.errors[name]
+      if( this.props.messages[name]) 
+        o[name] = this.props.messages[name]
 
       return o
     }, {})
   }
 
+}
+
+function getChildren(props, context) {
+  
+  if ( process.env.NODE_ENV !== 'production' ){
+    // this is to avoid the warning but its hacky so lets do it a less hacky way in production
+    return attachChildren(React.Children.only(props.children), context)
+  }
+  else
+    return props.children
 }
 
 function attachChildren(children, context) {

@@ -1,10 +1,11 @@
 'use strict';
 var React = require('react/addons')
+var Promise = require('es6-promise').Promise
 var Validator = require('../src/Validator')
-var ValidationContainer = require('../src/ValidationContainer.jsx')
-var FormInput = require('../src/ValidationInput.jsx')
-var FormButton = require('../src/ValidateButton.jsx')
-var ValidationMessage = require('../src/ValidationMessage.jsx')
+var ValidationContainer = require('../src/MessageContainer.jsx')
+var FormInput = require('../src/MessageSource.jsx')
+var FormButton = require('../src/MessageTrigger.jsx')
+var ValidationMessage = require('../src/Message.jsx')
 var RW = require('react-widgets')
 
 /*
@@ -34,14 +35,16 @@ class App extends React.Component {
     }
 
     // This is the callback used by the validator component
-    this.validator = new Validator((path, { validations, messages }) => {
+    this.validator = new Validator((path, validations ) => {
       var value = getter(path)(this.state)
         , valid, error;
 
-      valid = validations.every( (method, idx) => {
-        var valid =  validator[method](value)
+      valid = validations.every(({ rule, message }) => {
+        var valid =  validator[rule](value)
 
-        if(!valid) error = messages[idx]
+        if(!valid) 
+          error = message || `${path} is invalid`
+
         return valid
       })
 
@@ -63,19 +66,15 @@ class App extends React.Component {
       , input;
 
     Promise.all(queue.map(this._validateInput, this))
-      .then(() => {
-        this.setState({ errors: validator.errors() })
-      })
+      .then(() => this.setState({ messages: validator.errors() }))
+      .catch( e => setTimeout(()=> { throw e }))
     
     this._queue = []
   }
 
   _validateInput(input){
-    var validator = this.validator;
-
-    return validator
-      .validateField(input.props.for, input.props)
-      .catch( e => setTimeout(()=> { throw e }))
+    return this.validator
+      .validate(input.props.for, input.props.validations)  
   }
 
   /*
@@ -84,20 +83,20 @@ class App extends React.Component {
   render(){
     let model = this.state; // the data to bind to the form
     
-    let onValidate = e => {
+    let handleValidationRequest = e => {
       if( e.event === 'onChange')
         return this._queueValidation(e.target)
       
       this._validateInput(e.target)
-        .then(() => this.setState({ errors: this.validator.errors() }))
+        .then(() => this.setState({ messages: this.validator.errors() }))
         .catch( e => setTimeout(()=> { throw e }))
     }
 
     return (
       <div style={{ width: 400 }}>
         <ValidationContainer 
-          errors={this.state.errors}
-          onValidate={onValidate}
+          messages={this.state.messages}
+          onValidationNeeded={handleValidationRequest}
         >
 
           <form className='form-horizontal' >
@@ -108,8 +107,7 @@ class App extends React.Component {
                 <div className='col-sm-8'>
                   {/* we add a prop that we can check in our onValidate method */}
                   <FormInput for='personal.name' group='personal' 
-                    validations={['isRequired']} 
-                    messages={['please enter a name']}>
+                    validations={[{ rule: 'isRequired', message: 'please enter a name'}]}>
 
                     <input type='text' className='form-control' 
                       value={model.personal.name} 
@@ -122,8 +120,9 @@ class App extends React.Component {
               <div className='form-group'>
                 <label className='control-label col-sm-3'>birthday</label>
                 <div className='col-sm-8'>
-                  <FormInput for='personal.birthday' group='personal' 
-                    validations={['isDate']} messages={['please enter a date']}>
+                  <FormInput for='personal.birthday' 
+                    group='personal' 
+                    validations={[{ rule: 'isDate', message: 'please enter a date' }]}>
                       <RW.DateTimePicker time={false} format='d' 
                         value={model.personal.birthday} 
                         onChange={this.createHandler('personal.birthday')}/>
@@ -143,8 +142,10 @@ class App extends React.Component {
                 <label className='control-label col-sm-3'>favorite number</label>
                 <div className='col-sm-8'>
                   <FormInput for='trivia.favNumber' 
-                    validations={['isInt', 'isPositive']} 
-                    messages={['please enter an integer', 'please enter a positive number']}>
+                    validations={[
+                      { rule: 'isInt', message: 'please enter an integer' }, 
+                      { rule: 'isPositive', message: 'please enter a positive number'}]} 
+                    >
                       <RW.NumberPicker value={model.trivia.favNumber} onChange={this.createHandler('trivia.favNumber')}/>
                   </FormInput>
                   <ValidationMessage for='trivia.favNumber'/>

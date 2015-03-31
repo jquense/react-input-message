@@ -11,10 +11,7 @@ class Validator {
   constructor(validate){
     
     this._validator = validate
-
-    this._fields = {}
-    this._groups = {}
-    this._errors = {}
+    this._errors = Object.create(null)
   }
 
   
@@ -34,7 +31,7 @@ class Validator {
     return !this._errors[name] || !this._errors[name].length
   }
 
-  validateField(name, context){
+  validate(name, context){
     var fields = [].concat(name).map( key => this._validateField(key, context))
 
     this._removeError(name)
@@ -59,13 +56,8 @@ class Validator {
   }
 
   _removeError(fields){
-    [].concat(fields)
-      .forEach( field => delete this._errors[field])
-  }
-
-  _fieldsForGroups(grps){
-    return uniq([].concat(grps).reduce( 
-      (g, grp) => g.concat(this._groups[grp]), []))
+    [].concat(fields).forEach( 
+      field => delete this._errors[field])
   }
 }
 
