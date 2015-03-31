@@ -8,7 +8,7 @@ var ValidationMessage = require('../src/ValidationMessage.jsx')
 var RW = require('react-widgets')
 
 /*
- *  This a simple example showing how you can hook up valiation based on specified rules (the traditional way)
+ *  This a simple example showing how you can hook up validation based on specified rules (the traditional way)
  *  To do this we are going to use `node-validator` as the validation engine and specify validation rules on the 
  *  <FormInput/> with a simple syntax i just made up 
  */
@@ -24,54 +24,79 @@ validator.extend('isPositive', str => parseFloat(str) > 0)
 validator.extend('isRequired', str => !!str.length)
 
 // Simple component to pull it all together
-var App = React.createClass({
+class App extends React.Component {
 
-  getInitialState: function(){
-    // create an empty model for the initial value
-    return {
-      validator: new Validator(this.validate),
+  constructor(){
+
+    this.state = {
       trivia: {},
       personal: {}
     }
-  },
+
+    // This is the callback used by the validator component
+    this.validator = new Validator((path, { validations, messages }) => {
+      var value = getter(path)(this.state)
+        , valid, error;
+
+      valid = validations.every( (method, idx) => {
+        var valid =  validator[method](value)
+
+        if(!valid) error = messages[idx]
+        return valid
+      })
+
+      return error
+    })
+
+  }
 
   _queueValidation(path){
     var queue = this._queue || (this._queue = [])
 
     if (queue.indexOf(path) === -1)
       queue.push(path)
-  },
+  }
 
   _flushValidations(){
-    var validator = this.state.validator
+    var validator = this.validator
       , queue = this._queue || []
       , input;
 
-    Promise.all(queue, input => validator.validateField(input.props.for, input.props))
-      .then( () => this.setState({ errors: this.state.validator.errors() }))
+    Promise.all(queue.map(this._validateInput, this))
+      .then(() => {
+        this.setState({ errors: validator.errors() })
+      })
     
     this._queue = []
-  },
+  }
+
+  _validateInput(input){
+    var validator = this.validator;
+
+    return validator
+      .validateField(input.props.for, input.props)
+      .catch( e => setTimeout(()=> { throw e }))
+  }
 
   /*
    *  Lets render a form that validates based on rules specified per input
    */
   render(){
-    var self = this
-      , model = this.state; // the data to bind to the form
+    let model = this.state; // the data to bind to the form
     
-    function onValidate(e){
+    let onValidate = e => {
       if( e.event === 'onChange')
-        return self._queueValidation(e.target)
+        return this._queueValidation(e.target)
       
-      self.state.validator.validateField(e.field, e.target.props)
+      this._validateInput(e.target)
+        .then(() => this.setState({ errors: this.validator.errors() }))
+        .catch( e => setTimeout(()=> { throw e }))
     }
 
     return (
       <div style={{ width: 400 }}>
         <ValidationContainer 
           errors={this.state.errors}
-          validator={this.state.validator}
           onValidate={onValidate}
         >
 
@@ -135,44 +160,24 @@ var App = React.createClass({
         </ValidationContainer>
       </div>
     )
-  },
-
-  /*
-  * This is the callback used by the validator component
-  */
-  validate(path, { validations, messages }) {
-    // The state is updated by widgets, but isn't always synchronous so we check _pendingState first
-    var value = getter(path)(this._pendingState || this.state );
-
-    var valid, error;
-
-    valid = validations.every( (method, idx) => {
-      var valid =  validator[method](value)
-
-      if(!valid) error = messages[idx]
-      return valid
-    })
-
-    return error
-  },
+  }
 
   /*
   * This is a little factory method that returns a function that updates the state for a given path
   * it creates the `onChange` handlers for our inputs
   */
   createHandler(path){
-    var self = this
-      , setpath = setter(path)
+    var setpath = setter(path)
 
-    return function(val){
-      if( val && val.target) // in case we got a `SyntheticEvent` object, react-widgets pass the value directly to onChange
+    return val => {
+      if( val && val.target) // in case we got a `SyntheticEvent` object; react-widgets pass the value directly to onChange
         val = val.target.value
 
-      setpath(self.state, val)
-      self.setState(self.state, () => self._flushValidations())
+      setpath(this.state, val)
+      this.setState(this.state, () => this._flushValidations())
     }
-  },
-})
+  }
+}
 
 React.render(<App/>, document.body);
 

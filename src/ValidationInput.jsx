@@ -34,7 +34,7 @@ var FormInput = React.createClass({
 
 
   componentWillMount(){
-    this.getParentContext().register(this.props.for, this.props.group)
+    this.getParentContext().register(this.props.for, this.props.group, this)
   },
 
   componentWillUnmount() {
@@ -44,7 +44,7 @@ var FormInput = React.createClass({
   componentWillReceiveProps(nextProps) {
     // in case anything has changed
     this.getParentContext().unregister(this.props.for)
-    this.getParentContext().register(nextProps.for, nextProps.group)
+    this.getParentContext().register(nextProps.for, nextProps.group, this)
   },
 
   render() {

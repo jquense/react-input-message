@@ -1,6 +1,7 @@
 
 var config = {
       experimental: true,
+      playground: true,
       loose: ['all'],
 
       whitelist: [
