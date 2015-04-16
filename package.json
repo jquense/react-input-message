@@ -1,7 +1,7 @@
 {
   "name": "react-input-message",
   "description": "unopinionated form input annotation",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "repository": {
     "url": "git://github.com/jquense/react-input-message.git"
   },
