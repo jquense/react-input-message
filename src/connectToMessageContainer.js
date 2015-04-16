@@ -4,10 +4,11 @@ module.exports = Component =>
   class MessageListener extends React.Component {
 
     static propTypes = {
+
       for: React.PropTypes.oneOfType([
              React.PropTypes.string,
              React.PropTypes.arrayOf(React.PropTypes.string)
-           ]).isRequired
+           ])
     }
 
     static contextTypes ={
@@ -33,15 +34,20 @@ module.exports = Component =>
     }
 
     render(){
-      return <Component {...this.props} {...this.state}/>
+      let { for: fieldFor, ...props } = this.props
+
+      return <Component {...props} {...this.state}/>
     }
 
     _getValidationState(){
+      if ( !this.props.for )
+        return {}
+      
       var messages = this.getContext().messages(this.props.for);
 
       return { 
         messages,
-        active: messages && Object.keys(messages).length
+        active: !!(messages && Object.keys(messages).length)
       }
     }
 

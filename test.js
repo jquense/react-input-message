@@ -1,4 +1,6 @@
 'use strict';
+
+
 var slice = Array.prototype.slice;
 
 // Phantom js polyfill
@@ -27,6 +29,13 @@ chai.use(require('sinon-chai'))
 
 chai.should();
 
+
+window.expect = chai.expect;
+
 var testsContext = require.context("./test", true);
+
+console.log('hi', testsContext)
+
+it('should', ()=> console.log(require.context("./test", true)))
 
 testsContext.keys().forEach(testsContext);

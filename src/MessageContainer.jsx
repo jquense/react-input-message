@@ -3,17 +3,17 @@ var React   = require('react')
   , ReactElement = require('react/lib/ReactElement');
 
 var Promise = require('es6-promise').Promise
-  , uniq    = require('array-uniq')
+  , uniq = array => array.filter((item, idx) => array.indexOf(item) == idx)
 
 
 module.exports = class ValidationContainer extends React.Component {
 
   static defaultProps = {
-    messages: []
+    messages: Object.create(null)
   }
 
   static propTypes = {
-    messages:           React.PropTypes.array,
+    messages:           React.PropTypes.object,
     onValidationNeeded: React.PropTypes.func.isRequired
   }
 
@@ -35,8 +35,8 @@ module.exports = class ValidationContainer extends React.Component {
 
     this._handlers = []
     
-    this._groups = Map ? new Map() : Object.create(null)
-    this._fields = Map ? new Map() : Object.create(null)
+    this._groups = window.Map ? new Map() : Object.create(null)
+    this._fields = window.Map ? new Map() : Object.create(null)
 
     this.state = {
       children: getChildren(props, this.getChildContext())
@@ -87,6 +87,8 @@ module.exports = class ValidationContainer extends React.Component {
   }
 
   addField(name, group, target) {
+    if ( !name ) return 
+
     this._fields[name] = target
 
     if( !(!group || !group.length))
@@ -105,6 +107,9 @@ module.exports = class ValidationContainer extends React.Component {
 
           if(idx !== -1 ) this._groups[group].splice(idx, 1)
         };
+
+    if ( !name ) 
+      return 
 
     if( group ) 
       return remove(name, group)
@@ -183,3 +188,4 @@ function attachChildren(children, context) {
     )
   }
 }
+

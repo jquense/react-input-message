@@ -3,8 +3,6 @@ var React   = require('react')
   , ReactElement = require('react/lib/ReactElement');
 
 var Promise = require('es6-promise').Promise
-  , uniq    = require('array-uniq')
-
 
 class Validator {
 

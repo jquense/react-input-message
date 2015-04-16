@@ -1,28 +1,39 @@
 'use strict';
 var React = require('react')
+  , cn = require('classnames')
   , connectToMessageContainer = require('./connectToMessageContainer');
 
-class Message extends React.Component {
+let values = obj => Object.keys(obj).map( k => obj[k] )
+
+class Message {
 
   static defaultProps = {
-    component: 'span'
+    component: 'span',
+    delim: ', '
+  }
+
+  constructor(props){
+    this.props = props
   }
 
   render() {
-    var classes = 'rv-validation-message'
-      , errors = this.props.messages;
+    var { 
+        component: Component
+      , messages
+      , active
+      , delim
+      , ...props } = this.props;
 
-    errors = Object.keys(errors)
-        .reduce( (errs, grp) => errs.concat(errors[grp]), []);
+    if (!active)
+      return null
 
-    if (this.props.active)
-      classes += ' field-error'
-
-    return React.createElement(this.props.component, {
-      className: classes,
-    }, errors.join(', '));
+    return (
+      <Component {...props}>
+      { values(messages).join(delim) }
+      </Component>
+    )
   }
-
 }
 
 module.exports = connectToMessageContainer(Message)
+module.exports._Message = Message

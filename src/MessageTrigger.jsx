@@ -1,55 +1,103 @@
 'use strict';
-var React  = require('react')
+var React = require('react')
+  , cn = require('classnames')
+  , connectToMessageContainer = require('./connectToMessageContainer');
 
-var MessageTrigger = React.createClass({
 
-  propTypes: {
-    component: React.PropTypes.oneOfType([
-                React.PropTypes.string,
-                React.PropTypes.func
-               ]).isRequired,
-    group:  React.PropTypes.oneOfType([
-              React.PropTypes.string,
-              React.PropTypes.arrayOf(React.PropTypes.string)
-            ])
-  },
 
-  contextTypes: {
-    onValidateGroup: React.PropTypes.func,
+class MessageTrigger extends React.Component{
+
+  static propTypes = {
+    events:      React.PropTypes.arrayOf(React.PropTypes.string),
+    activeClass: React.PropTypes.string,
+
+    for:   requiredIfNot('group', React.PropTypes.string),
+
+    group: React.PropTypes.oneOfType([
+             React.PropTypes.string,
+             React.PropTypes.arrayOf(React.PropTypes.string)
+           ])
+  }
+
+  static contextTypes = {
     onValidateField: React.PropTypes.func,
-  },
+    onValidateGroup: React.PropTypes.func,
+    register:        React.PropTypes.func
+  }
+
+  static defaultProps = {
+    events: [ 'onChange' ],
+    activeClass: 'message-active'
+  }
+
 
   getContext(){
     return process.env.NODE_ENV !== 'production' 
       ? this.context
       : this._reactInternalInstance._context
-  },
-
-  getDefaultProps() {
-    return {
-      component: 'button'
-    }
-  },
-
-  render() {
-    var { 
-        children
-      , component
-      , ...props } = this.props;
-
-    return React.createElement(
-        component
-      , { ...props, onClick: this._click }
-      , children);
-  },
-
-  _click(...args){
-    this.getContext().onValidateGroup(this.props.group, 'click', this, args)
-      
-    this.props.onClick 
-      && this.props.onClick(...args)
   }
 
-});
+  componentWillMount(){
+    this._unregister = this.getContext().register(this.props.for, this.props.group, this)
+  }
 
-module.exports = MessageTrigger;
+  componentWillUnmount() {
+    this._unregister()
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this._unregister()
+    this._unregister = this.getContext().register(nextProps.for, nextProps.group, this)
+  }
+
+  render() {
+    var errClass = this.props.activeClass
+      , active = this.props.active
+      , child = React.Children.only(this.props.children);
+
+    return React.cloneElement(child, { 
+
+      ...this._events(child.props),
+
+      name: this.props.for,
+      
+      className: cn(child.props.className, 'rv-form-input', { [errClass]: active })
+    })
+  }
+
+  _events(childProps){
+    var notify = this._notify;
+
+    return this.props.events.reduce((map, evt) => {
+      map[evt] = notify.bind(this, childProps[evt], evt)
+      return map
+    }, {})
+  }
+
+  _notify(handler, event, ...args){
+    var context= this.getContext();
+
+    if( this.props.for )
+      context.onValidateField(this.props.for, event, this, args)
+    else
+      context.onValidateGroup(this.props.group, event, this, args)
+
+    handler 
+      && handler.apply(this, args)
+  }
+}
+
+module.exports = connectToMessageContainer(MessageTrigger)
+
+function requiredIfNot(propName, propType){
+  var type = React.PropTypes.string
+
+  return function(props, name, componentName){
+    var type = propType
+
+    if (!props.hasOwnProperty(propName))
+      type = type.isRequired
+    
+    return type(props, name, componentName)
+  }
+}

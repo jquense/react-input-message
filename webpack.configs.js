@@ -52,7 +52,10 @@ module.exports = {
 
   test: {
     devtool: 'inline-source-map',
-    cache: true,
+    cache: false,
+
+    entry: './test.js',
+
     resolve: {
       extensions: ['', '.js', '.jsx']
     },

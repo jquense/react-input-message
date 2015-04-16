@@ -3,15 +3,16 @@ var React = require('react/addons')
 var Promise = require('es6-promise').Promise
 var Validator = require('../src/Validator')
 var ValidationContainer = require('../src/MessageContainer.jsx')
-var FormInput = require('../src/MessageSource.jsx')
-var FormButton = require('../src/MessageTrigger.jsx')
-var ValidationMessage = require('../src/Message.jsx')
+var MessageTrigger = require('../src/MessageTrigger.jsx')
+var Message = require('../src/Message.jsx')
+var connectToMessageContainer = require('../src/connectToMessageContainer')
 var RW = require('react-widgets')
+var cn = require('classnames');
 
 /*
  *  This a simple example showing how you can hook up validation based on specified rules (the traditional way)
  *  To do this we are going to use `node-validator` as the validation engine and specify validation rules on the 
- *  <FormInput/> with a simple syntax i just made up 
+ *  <MessageTrigger/> with a simple syntax i just made up 
  */
 var validator = require('validator')
 
@@ -23,6 +24,23 @@ var setter = require('property-expr').setter
 // lets add two custom validators
 validator.extend('isPositive', str => parseFloat(str) > 0)
 validator.extend('isRequired', str => !!str.length)
+
+class FormButton extends React.Component {
+  
+  render() {
+    var { 
+        children
+      , group
+      , ...props } = this.props;
+
+    return (
+      <MessageTrigger group={group} events={['onClick']}>
+        <button {...props}>{ this.props.children }</button>
+      </MessageTrigger>
+    )
+  }
+}
+
 
 // Simple component to pull it all together
 class App extends React.Component {
@@ -106,28 +124,28 @@ class App extends React.Component {
                 <label className='control-label col-sm-3'>name</label>
                 <div className='col-sm-8'>
                   {/* we add a prop that we can check in our onValidate method */}
-                  <FormInput for='personal.name' group='personal' 
+                  <MessageTrigger for='personal.name' group='personal' 
                     validations={[{ rule: 'isRequired', message: 'please enter a name'}]}>
 
                     <input type='text' className='form-control' 
                       value={model.personal.name} 
                       onChange={this.createHandler('personal.name')}/>
 
-                  </FormInput>
-                  <ValidationMessage for='personal.name'/>
+                  </MessageTrigger>
+                  <Message for='personal.name' className='form-message'/>
                 </div>
               </div>
               <div className='form-group'>
                 <label className='control-label col-sm-3'>birthday</label>
                 <div className='col-sm-8'>
-                  <FormInput for='personal.birthday' 
+                  <MessageTrigger for='personal.birthday' 
                     group='personal' 
                     validations={[{ rule: 'isDate', message: 'please enter a date' }]}>
                       <RW.DateTimePicker time={false} format='d' 
                         value={model.personal.birthday} 
                         onChange={this.createHandler('personal.birthday')}/>
-                  </FormInput>
-                  <ValidationMessage for='personal.birthday'/>
+                  </MessageTrigger>
+                  <Message for='personal.birthday' className='form-message'/>
                 </div>
               </div>
               <div className='form-group'>
@@ -141,14 +159,14 @@ class App extends React.Component {
               <div className='form-group'>
                 <label className='control-label col-sm-3'>favorite number</label>
                 <div className='col-sm-8'>
-                  <FormInput for='trivia.favNumber' 
+                  <MessageTrigger for='trivia.favNumber' 
                     validations={[
                       { rule: 'isInt', message: 'please enter an integer' }, 
                       { rule: 'isPositive', message: 'please enter a positive number'}]} 
                     >
                       <RW.NumberPicker value={model.trivia.favNumber} onChange={this.createHandler('trivia.favNumber')}/>
-                  </FormInput>
-                  <ValidationMessage for='trivia.favNumber'/>
+                  </MessageTrigger>
+                  <Message for='trivia.favNumber' className='form-message'/>
                 </div>
               </div>
               <div className='form-group'>

@@ -51,3 +51,5 @@ gulp.task('dev', function() {
 
 
 gulp.task('release', ['clean', 'build', 'less'])
+
+gulp.task('publish', ['release'], require('rf-release'))
