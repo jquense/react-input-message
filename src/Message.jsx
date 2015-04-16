@@ -22,6 +22,7 @@ class Message {
       , messages
       , active
       , delim
+      , for: fieldFor
       , ...props } = this.props;
 
     if (!active)

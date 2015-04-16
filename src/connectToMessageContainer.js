@@ -34,9 +34,7 @@ module.exports = Component =>
     }
 
     render(){
-      let { for: fieldFor, ...props } = this.props
-
-      return <Component {...props} {...this.state}/>
+      return <Component {...this.props} {...this.state}/>
     }
 
     _getValidationState(){

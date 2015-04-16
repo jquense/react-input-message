@@ -58,10 +58,8 @@ class MessageTrigger extends React.Component{
     return React.cloneElement(child, { 
 
       ...this._events(child.props),
-
-      name: this.props.for,
       
-      className: cn(child.props.className, 'rv-form-input', { [errClass]: active })
+      className: cn(child.props.className, { [errClass]: active })
     })
   }
 
