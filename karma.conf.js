@@ -12,7 +12,7 @@ module.exports = function (config) {
 
     files: [
       'vendor/sinon-1.10.3.js', //because sinon hates webpack
-      'test.js'
+      '_test.js'
     ],
 
     port: 9876,
@@ -25,7 +25,7 @@ module.exports = function (config) {
     browsers: ['PhantomJS'], 
 
     preprocessors: {
-      'test.js': ['webpack', 'sourcemap']
+      '_test.js': ['webpack', 'sourcemap']
     },
 
     webpack: require('./webpack.configs').test,

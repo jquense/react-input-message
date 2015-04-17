@@ -38,9 +38,6 @@ module.exports = Component =>
     }
 
     _getValidationState(){
-      if ( !this.props.for )
-        return {}
-      
       var messages = this.getContext().messages(this.props.for);
 
       return { 

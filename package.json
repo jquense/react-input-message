@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "classnames": "^1.1.4",
-    "es6-promise": "^2.0.1"
+    "es6-promise": "~2.0.1"
   },
   "peerDependencies": {
     "react": ">=0.13.0"
@@ -43,6 +43,7 @@
     "mocha": "~1.21.4",
     "phantomjs": "~1.9.10",
     "property-expr": "^1.0.1",
+    "react": "^0.13.1",
     "react-widgets": "^2.4.1",
     "rf-release": "git://github.com/jquense/rf-release",
     "rimraf": "^2.2.8",

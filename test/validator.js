@@ -1,9 +1,24 @@
 'use strict';
 var Validator = require('../src/Validator');
 
+
+
+
+
 describe('validator', function(){
   var validator;
 
+  it('should use passed in validation function', () => {
+    var spy
+      , context = {}
+      , validator = new Validator(spy = sinon.spy())
+
+    return validator.validate('field', context)
+      .should.be.fulfilled.then(valid => {
+        spy.should.have.been.calledWithExactly('field', context)
+      })
+  })
+  
   it('should use passed in validation function', () => {
     var spy
       , context = {}

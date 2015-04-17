@@ -18,23 +18,19 @@ var findTag = utils.findRenderedDOMComponentWithTag
 describe.only('Container', function(){
   var validator;
 
-  // it('should pass messages', () => {
-  //   var inst = utils.renderIntoDocument(
-  //     <MessageContainer messages={{ fieldA: 'hi' }} >
-  //       <div>
-  //         <Message for='fieldA' className='msg'/>
-  //         <Message for='fieldB' className='msg'/>
-  //       </div>
-  //     </MessageContainer>)
+  it('should pass messages', () => {
+    var inst = utils.renderIntoDocument(
+      <MessageContainer messages={{ fieldA: ['hi', 'good day'] }} >
+        <div>
+          <Message for='fieldA' className='msg'/>
+          <Message for='fieldB' className='msg'/>
+          <Message className='msg'/>
+        </div>
+      </MessageContainer>)
 
-  //   var messages = findClass(inst, 'msg');
+    var messages = findClass(inst, 'msg'); //will throw if msg 2 is there
 
-  //   console.log(messages)
-
-  //   messages[0].props.active.should.equal(true)
-  //   messages[0].props.messages.should.equal('hi')
-
-  //   messages[1].props.active.should.equal(false)
-  // })
+    React.findDOMNode(messages).textContent.should.equal('hi, good day')
+  })
 
 })

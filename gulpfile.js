@@ -49,6 +49,12 @@ gulp.task('dev', function() {
   }).listen(8080, "localhost");
 })
 
+gulp.task("webpack", function(callback) {
+    // run webpack
+    webpack(configs.test, function(err, stats) {
+      callback(err);
+    });
+});
 
 gulp.task('release', ['clean', 'build', 'less'])
 

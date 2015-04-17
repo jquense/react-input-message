@@ -52,17 +52,16 @@ module.exports = {
 
   test: {
     devtool: 'inline-source-map',
-    cache: false,
+    cache: true,
 
-    entry: './test.js',
+    entry: './_test.js',
 
     resolve: {
       extensions: ['', '.js', '.jsx']
     },
+    
     module: {
       loaders: [
-        { test: /\.css$/, loader: "style-loader!css-loader" },
-        { test: /\.less$/, loader: "style-loader!css-loader!less-loader" },
         { test: /sinon-chai/, loader: "imports?define=>false" },
         { 
           test: /\.jsx$|\.js$/, 

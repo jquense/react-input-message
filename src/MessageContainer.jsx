@@ -49,6 +49,10 @@ module.exports = class ValidationContainer extends React.Component {
     })
   }
 
+  componentDidMount(){
+    this._emit()
+  }
+
   componentDidUpdate(){
     this._emit()
   }

@@ -52,7 +52,7 @@ class MessageTrigger extends React.Component{
 
   render() {
     var errClass = this.props.activeClass
-      , active = this.props.active
+      , active = this.props.for && this.props.active
       , child = React.Children.only(this.props.children);
 
     return React.cloneElement(child, { 

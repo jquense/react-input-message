@@ -32,10 +32,6 @@ chai.should();
 
 window.expect = chai.expect;
 
-var testsContext = require.context("./test", true);
-
-console.log('hi', testsContext)
-
-it('should', ()=> console.log(require.context("./test", true)))
+var testsContext = require.context("./test", true, /\.(js$|jsx$)/);
 
 testsContext.keys().forEach(testsContext);
