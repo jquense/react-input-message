@@ -1,14 +1,16 @@
 var React = require('react')
 
+var stringOrArrayofStrings = React.PropTypes.oneOfType([
+      React.PropTypes.string,
+      React.PropTypes.arrayOf(React.PropTypes.string)
+    ])
+
 module.exports = Component =>
   class MessageListener extends React.Component {
 
     static propTypes = {
-
-      for: React.PropTypes.oneOfType([
-             React.PropTypes.string,
-             React.PropTypes.arrayOf(React.PropTypes.string)
-           ])
+      for:   stringOrArrayofStrings,
+      group: stringOrArrayofStrings
     }
 
     static contextTypes ={
@@ -38,7 +40,7 @@ module.exports = Component =>
     }
 
     _getValidationState(){
-      var messages = this.getContext().messages(this.props.for);
+      var messages = this.getContext().messages(this.props.for || this.props.group);
 
       return { 
         messages,
