@@ -40,7 +40,7 @@ module.exports = Component =>
     }
 
     _getValidationState(){
-      var messages = this.getContext().messages(this.props.for || this.props.group);
+      var messages = this.getContext().messages(this.props.for, this.props.group);
 
       return { 
         messages,

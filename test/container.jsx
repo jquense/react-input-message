@@ -6,7 +6,6 @@ var React = require('react/addons')
   , MessageTrigger
   , Message } = require('../src');
 
-
 var findTag = utils.findRenderedDOMComponentWithTag
   , findClass = utils.findRenderedDOMComponentWithClass
   , findAllTag = utils.scryRenderedDOMComponentsWithTag

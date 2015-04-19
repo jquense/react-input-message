@@ -5,6 +5,7 @@ var React   = require('react')
 var Promise = require('es6-promise').Promise
   , uniq = array => array.filter((item, idx) => array.indexOf(item) == idx)
 
+let has = (obj, key) => obj && {}.hasOwnProperty.call(obj, key)
 
 module.exports = class ValidationContainer extends React.Component {
 
@@ -35,8 +36,8 @@ module.exports = class ValidationContainer extends React.Component {
 
     this._handlers = []
     
-    this._groups = window.Map ? new Map() : Object.create(null)
-    this._fields = window.Map ? new Map() : Object.create(null)
+    this._groups = Object.create(null)
+    this._fields = Object.create(null)
 
     this.state = {
       children: getChildren(props, this.getChildContext())
@@ -97,7 +98,7 @@ module.exports = class ValidationContainer extends React.Component {
 
     if( !(!group || !group.length))
       [].concat(group).forEach( grp => {
-        if( !this._groups.hasOwnProperty(grp) )
+        if( !has(this._groups, grp) )
           return (this._groups[grp] = [name])
 
         if( this._groups[grp].indexOf(name) === -1)
@@ -118,7 +119,7 @@ module.exports = class ValidationContainer extends React.Component {
     if( group ) 
       return remove(name, group)
 
-    for(var key in this._groups) if (this._groups.hasOwnProperty(key))
+    for(var key in this._groups) if (has(this._groups, key))
       remove(name, key)
 
     this._fields[name] = false
@@ -142,9 +143,13 @@ module.exports = class ValidationContainer extends React.Component {
     this._handlers.forEach(fn => fn())
   }
 
-  _messages(names){
-    if( (!names || !names.length) )
-      return { ...this.props.messages }
+  _messages(names, groups){
+    if( (!names || !names.length) ){
+      if ( !groups || !groups.length)
+        return { ...this.props.messages }
+
+      names = this.fields(groups)
+    }
 
     return [].concat(names).reduce( (o, name) => {
       if( this.props.messages[name]) 
