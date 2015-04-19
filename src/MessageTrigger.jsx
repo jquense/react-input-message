@@ -11,7 +11,7 @@ class MessageTrigger extends React.Component{
     events:      React.PropTypes.arrayOf(React.PropTypes.string),
     activeClass: React.PropTypes.string,
 
-    for:   requiredIfNot('group', React.PropTypes.string),
+    for:   React.PropTypes.string,
 
     group: React.PropTypes.oneOfType([
              React.PropTypes.string,

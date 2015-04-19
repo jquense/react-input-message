@@ -15,7 +15,7 @@ var findTag = utils.findRenderedDOMComponentWithTag
   , findAllType = utils.scryRenderedComponentsWithType
   , trigger = utils.Simulate
 
-describe.only('Container', function(){
+describe('Container', function(){
   var validator;
 
   it('should pass messages', () => {
@@ -24,7 +24,6 @@ describe.only('Container', function(){
         <div>
           <Message for='fieldA' className='msg'/>
           <Message for='fieldB' className='msg'/>
-          <Message className='msg'/>
         </div>
       </MessageContainer>)
 

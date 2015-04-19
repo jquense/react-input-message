@@ -30,55 +30,49 @@ render(){
           <label>Name</label>
           {/* the `events` prop tells the MessageContainer what 
             * events to trigger a `onValidationNeeded` handler for */}
-          <MessageSource for='name' events={[ 'onChange', 'onBlur']}>
+          <MessageTrigger for='name' events={[ 'onChange', 'onBlur']}>
             <input type='text' 
               value={this.state.name} 
               onChange={handleChange}
             />
-          </MessageSource>
+          </MessageTrigger>
 
           {/* A `Message` Component will display field specific 
             * messages (as provided by the `messages` prop) */}
           <Message for='name'/>
         </div>
 
-         {/* `MessageTrigger` will trigger a `onValidationNeeded` event for the entire
-           * container, or just a specific group. */}
-        <MessageTrigger type='submit'>
-          Submit
+         {/* This `MessageTrigger` will trigger a `onValidationNeeded` event for the entire
+           * container, or just a specific group. Notice the lack of a `for` prop. */}
+        <MessageTrigger events={['onClick']}>
+          <button type='button'>Check</button>
         </MessageTrigger>
       </form>
     </MessageContainer>
   )
-
 ```
 
-`react-input-message` exports four simple components: 
+`react-input-message` exports 3 simple components and a utility class: 
 
 #### `MessageContainer`
 
 __Props__
 
-  - `onValidationNeeded`: a handler that fires for each `MessageSource` component
+  - `onValidationNeeded`: a handler that fires for each `MessageTrigger` component with a `for` prop
   - `messages`: a hash of field names (`for` prop values) and either a string, or an array of strings 
 
 
-#### `MessageSource`
-
-A MessageSource is a commponent that listens to its child for specific events. Generally this will be an input component
-
-__props__
-  - `for`: a field name or path
-  - `group`: an arbitrary group name that allows inputs to be triggered together
-  - `activeClass`: a class to be added to the input if its field is currently active
-  - `events`: default(['onChange']) an array of prop handlers that the MessageSource will list on, and trigger a `onValidationNeeded` event in the Container
-
 #### `MessageTrigger`
 
-  Simple component that will trigger onValidationNeeded for all or a group of inputs
+A MessageTrigger is a commponent that listens to its child for events and triggers a validation event in the containing `MessageContainer`. Generally this will be an input component.
 
-  - `component`: The Component class that will render, the default is `button`
-  - `group`: scopes the Trigger to a specific group, and will only trigger validation for inputs with the same `group` name
+__props__
+  - `for`: a field name or path. specifying a `for` prop identifies the Trigger as "something that will need validation". Triggers that exclude a `for` prop won't be the subject of an onValidation event themselves but can trigger validations for other triggers (via groups)
+  - `group`: an arbitrary group name that allows inputs to be triggered together. If a `for` prop is specified then the `group` prop identifies the trigger as a member of that group. If the `for` prop is excluded then the `group` prop identifies which group to trigger validation for.
+  - `activeClass`: a class to be added to the input if its field is currently active
+  - `events`: default(['onChange']) an array of prop handlers that the MessageTrigger will list on, and trigger a `onValidationNeeded` event in the Container
+
+Leaving the `for` prop `undefined` is a good way to create buttons that can trigger validation for a group (or the entire container), but will not be the subject of a validation itself.
 
 #### `Message`
 
@@ -116,8 +110,5 @@ validator.validate('fieldName', { model: model })
   })
 
 validator.isValid('fieldName')
-
-
-
 ```
 

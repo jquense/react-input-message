@@ -34,7 +34,7 @@ class FormButton extends React.Component {
       , ...props } = this.props;
 
     return (
-      <MessageTrigger group={group} events={['onClick']}>
+      <MessageTrigger events={['onClick']}>
         <button {...props}>{ this.props.children }</button>
       </MessageTrigger>
     )
