@@ -3,7 +3,10 @@ var React = require('react')
   , cn = require('classnames')
   , connectToMessageContainer = require('./connectToMessageContainer');
 
-
+var stringOrArrayOfStrings = React.PropTypes.oneOfType([
+      React.PropTypes.string,
+      React.PropTypes.arrayOf(React.PropTypes.string)
+    ])
 
 class MessageTrigger extends React.Component{
 
@@ -11,12 +14,8 @@ class MessageTrigger extends React.Component{
     events:      React.PropTypes.arrayOf(React.PropTypes.string),
     activeClass: React.PropTypes.string,
 
-    for:   React.PropTypes.string,
-
-    group: React.PropTypes.oneOfType([
-             React.PropTypes.string,
-             React.PropTypes.arrayOf(React.PropTypes.string)
-           ])
+    for:   stringOrArrayOfStrings,
+    group: stringOrArrayOfStrings
   }
 
   static contextTypes = {
@@ -73,10 +72,12 @@ class MessageTrigger extends React.Component{
   }
 
   _notify(handler, event, ...args){
-    var context= this.getContext();
+    var context = this.getContext()
+      , forProps = this.props.for ? [].concat(this.props.for) : [];
 
-    if( this.props.for )
-      context.onValidateField(this.props.for, event, this, args)
+    console.log(forProps)
+    if( forProps.length )
+      [].concat(forProps).forEach(path => context.onValidateField(path, event, this, args))
     else
       context.onValidateGroup(this.props.group, event, this, args)
 

@@ -70,9 +70,12 @@ module.exports = class ValidationContainer extends React.Component {
         return () => this._handlers.splice(this._handlers.indexOf(fn), 1)
       },
 
-      register: (name, group, target) => {
-        this.addField(name, group, target)
-        return this.removeField.bind(this, name, group)
+      register: (names, group, target) => {
+        names = [].concat(names)
+
+        names.forEach(name => this.addField(name, group, target))
+
+        return () => names.forEach( name => this.removeField(name, group))
       },
       
       onValidateField: (field, event, target, args) => {
