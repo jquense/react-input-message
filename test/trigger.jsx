@@ -44,7 +44,6 @@ describe('Trigger', ()=>{
         </div>
       </MessageContainer>)
 
-    
     trigger.change(findTag(inst, 'input').getDOMNode())
 
     spy.should.have.been.calledTwice

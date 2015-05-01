@@ -75,7 +75,6 @@ class MessageTrigger extends React.Component{
     var context = this.getContext()
       , forProps = this.props.for ? [].concat(this.props.for) : [];
 
-    console.log(forProps)
     if( forProps.length )
       [].concat(forProps).forEach(path => context.onValidateField(path, event, this, args))
     else
