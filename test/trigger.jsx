@@ -30,10 +30,10 @@ describe('Trigger', ()=>{
     trigger.change(findTag(inst, 'input').getDOMNode())
 
     spy.should.have.been.calledOnce
-    spy.args[0][0].field.should.equal('fieldA')
+    spy.args[0][0].fields.should.eql(['fieldA'])
   })
 
-  it.only('should trigger event for each path', function(){
+  it('should trigger event once with multiple fields', function(){
     var spy = sinon.spy()
       , inst = utils.renderIntoDocument(
       <MessageContainer onValidationNeeded={spy} >
@@ -46,8 +46,7 @@ describe('Trigger', ()=>{
 
     trigger.change(findTag(inst, 'input').getDOMNode())
 
-    spy.should.have.been.calledTwice
-    spy.args[0][0].field.should.equal('fieldA')
-    spy.args[1][0].field.should.equal('fieldB')
+    spy.should.have.been.calledOnce
+    spy.args[0][0].fields.should.eql(['fieldA', 'fieldB'])
   })
 })

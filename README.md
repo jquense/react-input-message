@@ -52,6 +52,7 @@ render(){
   )
 ```
 
+
 `react-input-message` exports 3 simple components and a utility class: 
 
 #### `MessageContainer`
@@ -89,7 +90,7 @@ in lieu of mixins you can use this helper function to wrap a component so that i
 
 A very simple basic form validator class, to help manage input error state, use is completely optional. It is designed to nicely hook up to the `MessageContainer` component without being tightly coupled to it.
 
-  - `validate(field|fields, [ context ])` returns a promise that resolves with the valid state of the field. You can validate multiple fields by passing an array. You can also pass in a `context` object which will be passed to the `validationFn`
+  - `validate(fields, [ context ])` returns a promise that resolves with the valid state of the field. You can validate multiple fields by passing an array. You can also pass in a `context` object which will be passed to the `validationFn`
   - `isValid`: checks if a field is currently in an error state
   - `errors([fields])`: return a hash of errors, you can pass this object directly to a `MessageContainer` messages prop
 

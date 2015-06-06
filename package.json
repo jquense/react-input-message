@@ -1,7 +1,7 @@
 {
   "name": "react-input-message",
   "description": "unopinionated form input annotation",
-  "version": "0.5.8",
+  "version": "0.6.0",
   "repository": {
     "url": "git://github.com/jquense/react-input-message.git"
   },
@@ -12,7 +12,7 @@
   },
   "main": "lib/index.js",
   "scripts": {
-    "test": ""
+    "test": "karma start --single-run"
   },
   "dependencies": {
     "classnames": "^1.1.4",
@@ -22,17 +22,20 @@
     "react": ">=0.13.0"
   },
   "devDependencies": {
-    "babel": "^4.0.0",
-    "babel-loader": "^4.0.0",
+    "babel": "^5.2.16",
+    "babel-core": "^5.4.3",
+    "babel-loader": "^5.0.0",
+    "babel-plugin-object-assign": "^1.1.0",
     "chai": "^1.10.0",
     "chai-as-promised": "^4.1.1",
     "css-loader": "^0.9.1",
     "gulp": "^3.8.10",
-    "gulp-babel": "^4.0.0",
+    "gulp-babel-helpers": "^2.1.0",
     "gulp-less": "^2.0.1",
     "gulp-plumber": "^0.6.6",
     "gulp-rename": "^1.2.0",
     "imports-loader": "^0.6.3",
+    "jq-release": "*",
     "karma": "~0.12.23",
     "karma-mocha": "~0.1.9",
     "karma-mocha-reporter": "^0.3.1",
@@ -45,7 +48,6 @@
     "property-expr": "^1.0.1",
     "react": "^0.13.1",
     "react-widgets": "^2.4.1",
-    "jq-release": "*",
     "rimraf": "^2.2.8",
     "sinon-chai": "^2.6.0",
     "style-loader": "^0.8.3",

@@ -1,7 +1,7 @@
 'use strict';
 var gulp = require('gulp')
   , less = require('gulp-less')
-  , toFive = require("gulp-babel")
+  , babelTransform = require("gulp-babel-helpers")
   , rimraf  = require('rimraf')
   , rename  = require('gulp-rename')
   , plumber = require('gulp-plumber')
@@ -34,7 +34,7 @@ gulp.task('build', ['clean'], function(){
 
   return gulp.src(['./src/**/*.jsx', './src/**/*.js'])
       .pipe(plumber())
-      .pipe(toFive(configs.to5Config))
+      .pipe(babelTransform('./util/babelHelpers.js'))
       .pipe(rename({ extname: '.js' }))
       .pipe(gulp.dest('./lib'));
 })

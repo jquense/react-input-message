@@ -20,15 +20,15 @@ module.exports = class ValidationContainer extends React.Component {
 
   static childContextTypes = {
 
-    onValidateField: React.PropTypes.func,
-    onValidateGroup: React.PropTypes.func,
+    onValidateFields: React.PropTypes.func,
+    onValidateGroup:  React.PropTypes.func,
 
-    messages:        React.PropTypes.func,
+    messages:         React.PropTypes.func,
+ 
+    register:         React.PropTypes.func,
+    unregister:       React.PropTypes.func,
 
-    register:        React.PropTypes.func,
-    unregister:      React.PropTypes.func,
-
-    listen:          React.PropTypes.func
+    listen:           React.PropTypes.func
   }
 
   constructor(props, context) {
@@ -78,18 +78,16 @@ module.exports = class ValidationContainer extends React.Component {
         return () => names.forEach( name => this.removeField(name, group))
       },
       
-      onValidateField: (field, event, target, args) => {
+      onValidateFields: (fields, event, target, args) => {
         this.props.onValidationNeeded &&
-          this.props.onValidationNeeded({ event, field, args, target })
+          this.props.onValidationNeeded({ event, fields, args, target })
       },
 
       onValidateGroup: (group, event, target, args) => {
-        var inputs = this.fields(group);
+        var fields = this.fields(group);
 
-        inputs.forEach( field => {
-          this.props.onValidationNeeded &&
-            this.props.onValidationNeeded({ event, field, args, target: this._fields[field] })
-        })
+        this.props.onValidationNeeded &&
+          this.props.onValidationNeeded({ event, fields, args, target })
       }
     })
   }

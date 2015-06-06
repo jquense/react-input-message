@@ -19,9 +19,9 @@ class MessageTrigger extends React.Component{
   }
 
   static contextTypes = {
-    onValidateField: React.PropTypes.func,
-    onValidateGroup: React.PropTypes.func,
-    register:        React.PropTypes.func
+    onValidateFields: React.PropTypes.func,
+    onValidateGroup:  React.PropTypes.func,
+    register:         React.PropTypes.func
   }
 
   static defaultProps = {
@@ -76,7 +76,7 @@ class MessageTrigger extends React.Component{
       , forProps = this.props.for ? [].concat(this.props.for) : [];
 
     if( forProps.length )
-      [].concat(forProps).forEach(path => context.onValidateField(path, event, this, args))
+      context.onValidateFields(forProps, event, this, args)
     else
       context.onValidateGroup(this.props.group, event, this, args)
 

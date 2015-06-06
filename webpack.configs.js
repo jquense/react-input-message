@@ -1,28 +1,5 @@
 
-var config = {
-      experimental: true,
-      playground: true,
-      loose: ['all'],
-
-      whitelist: [
-        'es6.classes',
-        'es6.modules',
-        'es6.spread',
-        'es6.blockScoping',
-        'es6.arrowFunctions',
-        'es6.properties.computed',
-        'es6.properties.shorthand',
-        'es6.parameters.default',
-        'es6.parameters.rest',
-        'es6.templateLiterals',
-        'es7.objectRestSpread',
-        'react'
-      ]
-    }
-
 module.exports = {
-
-  to5Config: config,
 
   dev: {
     devtool: 'source-map',
@@ -43,8 +20,7 @@ module.exports = {
         { 
           test: /\.jsx$|\.js$/, 
           loader: 'babel-loader', 
-          exclude: /node_modules/,
-          query: config
+          exclude: /node_modules/
         }
       ]
     },
@@ -66,8 +42,7 @@ module.exports = {
         { 
           test: /\.jsx$|\.js$/, 
           loader: 'babel-loader', 
-          exclude: /node_modules/,
-          query: config
+          exclude: /node_modules/
         }
       ]
     },
