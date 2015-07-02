@@ -1,24 +1,23 @@
 'use strict';
 var React   = require('react')
-  , ReactElement = require('react/lib/ReactElement');
-
-var Promise = require('es6-promise').Promise
+  , ReactElement = require('react/lib/ReactElement')
+  , Promise = require('promise/lib/es6-extensions');
 
 class Validator {
 
   constructor(validate){
-    
+
     this._validator = validate
     this._errors = Object.create(null)
   }
 
-  
+
   errors(names){
     if( (!names || !names.length) )
       return { ...this._errors }
 
     return [].concat(names).reduce( (o, name) => {
-      if( this._errors[name]) 
+      if( this._errors[name])
         o[name] = this._errors[name]
 
       return o
@@ -54,7 +53,7 @@ class Validator {
   }
 
   _removeError(fields){
-    [].concat(fields).forEach( 
+    [].concat(fields).forEach(
       field => delete this._errors[field])
   }
 }

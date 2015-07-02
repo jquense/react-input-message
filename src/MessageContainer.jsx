@@ -2,8 +2,7 @@
 var React   = require('react')
   , ReactElement = require('react/lib/ReactElement');
 
-var Promise = require('es6-promise').Promise
-  , uniq = array => array.filter((item, idx) => array.indexOf(item) == idx)
+var uniq = array => array.filter((item, idx) => array.indexOf(item) == idx)
 
 let has = (obj, key) => obj && {}.hasOwnProperty.call(obj, key)
 
@@ -24,7 +23,7 @@ module.exports = class ValidationContainer extends React.Component {
     onValidateGroup:  React.PropTypes.func,
 
     messages:         React.PropTypes.func,
- 
+
     register:         React.PropTypes.func,
     unregister:       React.PropTypes.func,
 
@@ -35,7 +34,7 @@ module.exports = class ValidationContainer extends React.Component {
     super(props, context)
 
     this._handlers = []
-    
+
     this._groups = Object.create(null)
     this._fields = Object.create(null)
 
@@ -45,7 +44,7 @@ module.exports = class ValidationContainer extends React.Component {
   }
 
   componentWillReceiveProps(nextProps){
-    this.setState({ 
+    this.setState({
       children: getChildren(nextProps, this.getChildContext())
     })
   }
@@ -77,7 +76,7 @@ module.exports = class ValidationContainer extends React.Component {
 
         return () => names.forEach( name => this.removeField(name, group))
       },
-      
+
       onValidateFields: (fields, event, target, args) => {
         this.props.onValidationNeeded &&
           this.props.onValidationNeeded({ event, fields, args, target })
@@ -93,7 +92,7 @@ module.exports = class ValidationContainer extends React.Component {
   }
 
   addField(name, group, target) {
-    if ( !name ) return 
+    if ( !name ) return
 
     this._fields[name] = target
 
@@ -114,10 +113,10 @@ module.exports = class ValidationContainer extends React.Component {
           if(idx !== -1 ) this._groups[group].splice(idx, 1)
         };
 
-    if ( !name ) 
-      return 
+    if ( !name )
+      return
 
-    if( group ) 
+    if( group )
       return remove(name, group)
 
     for(var key in this._groups) if (has(this._groups, key))
@@ -135,7 +134,7 @@ module.exports = class ValidationContainer extends React.Component {
 
     groups = [].concat(groups)
 
-    return isGroup 
+    return isGroup
       ? uniq(groups.reduce((fields, group) => fields.concat(this._groups[group]), []))
       : Object.keys(this._fields);
   }
@@ -153,7 +152,7 @@ module.exports = class ValidationContainer extends React.Component {
     }
 
     return [].concat(names).reduce( (o, name) => {
-      if( this.props.messages[name]) 
+      if( this.props.messages[name])
         o[name] = this.props.messages[name]
 
       return o
@@ -163,7 +162,7 @@ module.exports = class ValidationContainer extends React.Component {
 }
 
 function getChildren(props, context) {
-  
+
   if ( process.env.NODE_ENV !== 'production' ){
     // this is to avoid the warning but its hacky so lets do it a less hacky way in production
     return attachChildren(React.Children.only(props.children), context)

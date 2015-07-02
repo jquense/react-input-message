@@ -1,6 +1,6 @@
 'use strict';
 var React = require('react/addons')
-var Promise = require('es6-promise').Promise
+var Promise = require('promise/lib/es6-extensions')
 var Validator = require('../src/Validator')
 var ValidationContainer = require('../src/MessageContainer.jsx')
 var MessageTrigger = require('../src/MessageTrigger.jsx')
@@ -11,8 +11,8 @@ var cn = require('classnames');
 
 /*
  *  This a simple example showing how you can hook up validation based on specified rules (the traditional way)
- *  To do this we are going to use `node-validator` as the validation engine and specify validation rules on the 
- *  <MessageTrigger/> with a simple syntax i just made up 
+ *  To do this we are going to use `node-validator` as the validation engine and specify validation rules on the
+ *  <MessageTrigger/> with a simple syntax i just made up
  */
 var validator = require('validator')
 
@@ -26,9 +26,9 @@ validator.extend('isPositive', str => parseFloat(str) > 0)
 validator.extend('isRequired', str => !!str.length)
 
 class FormButton extends React.Component {
-  
+
   render() {
-    var { 
+    var {
         children
       , group
       , ...props } = this.props;
@@ -60,7 +60,7 @@ class App extends React.Component {
       valid = validations.every(({ rule, message }) => {
         var valid =  validator[rule](value)
 
-        if(!valid) 
+        if(!valid)
           error = message || `${path} is invalid`
 
         return valid
@@ -86,13 +86,13 @@ class App extends React.Component {
     Promise.all(queue.map(this._validateInput, this))
       .then(() => this.setState({ messages: validator.errors() }))
       .catch( e => setTimeout(()=> { throw e }))
-    
+
     this._queue = []
   }
 
   _validateInput(input){
     return this.validator
-      .validate(input.props.for, input.props.validations)  
+      .validate(input.props.for, input.props.validations)
   }
 
   /*
@@ -100,11 +100,11 @@ class App extends React.Component {
    */
   render(){
     let model = this.state; // the data to bind to the form
-    
+
     let handleValidationRequest = e => {
       if( e.event === 'onChange')
         return this._queueValidation(e.target)
-      
+
       this._validateInput(e.target)
         .then(() => this.setState({ messages: this.validator.errors() }))
         .catch( e => setTimeout(()=> { throw e }))
@@ -112,7 +112,7 @@ class App extends React.Component {
 
     return (
       <div style={{ width: 400 }}>
-        <ValidationContainer 
+        <ValidationContainer
           messages={this.state.messages}
           onValidationNeeded={handleValidationRequest}
         >
@@ -124,11 +124,11 @@ class App extends React.Component {
                 <label className='control-label col-sm-3'>name</label>
                 <div className='col-sm-8'>
                   {/* we add a prop that we can check in our onValidate method */}
-                  <MessageTrigger for='personal.name' group='personal' 
+                  <MessageTrigger for='personal.name' group='personal'
                     validations={[{ rule: 'isRequired', message: 'please enter a name'}]}>
 
-                    <input type='text' className='form-control' 
-                      value={model.personal.name} 
+                    <input type='text' className='form-control'
+                      value={model.personal.name}
                       onChange={this.createHandler('personal.name')}/>
 
                   </MessageTrigger>
@@ -138,11 +138,11 @@ class App extends React.Component {
               <div className='form-group'>
                 <label className='control-label col-sm-3'>birthday</label>
                 <div className='col-sm-8'>
-                  <MessageTrigger for='personal.birthday' 
-                    group='personal' 
+                  <MessageTrigger for='personal.birthday'
+                    group='personal'
                     validations={[{ rule: 'isDate', message: 'please enter a date' }]}>
-                      <RW.DateTimePicker time={false} format='d' 
-                        value={model.personal.birthday} 
+                      <RW.DateTimePicker time={false} format='d'
+                        value={model.personal.birthday}
                         onChange={this.createHandler('personal.birthday')}/>
                   </MessageTrigger>
                   <Message for='personal.birthday' className='form-message'/>
@@ -159,10 +159,10 @@ class App extends React.Component {
               <div className='form-group'>
                 <label className='control-label col-sm-3'>favorite number</label>
                 <div className='col-sm-8'>
-                  <MessageTrigger for='trivia.favNumber' 
+                  <MessageTrigger for='trivia.favNumber'
                     validations={[
-                      { rule: 'isInt', message: 'please enter an integer' }, 
-                      { rule: 'isPositive', message: 'please enter a positive number'}]} 
+                      { rule: 'isInt', message: 'please enter an integer' },
+                      { rule: 'isPositive', message: 'please enter a positive number'}]}
                     >
                       <RW.NumberPicker value={model.trivia.favNumber} onChange={this.createHandler('trivia.favNumber')}/>
                   </MessageTrigger>
