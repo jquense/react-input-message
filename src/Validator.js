@@ -9,6 +9,7 @@ class Validator {
 
     this._validator = validate
     this._errors = Object.create(null)
+    this.hasValidated = false;
   }
 
 
@@ -34,6 +35,10 @@ class Validator {
     this._removeError(name)
 
     return Promise.all(fields)
+      .then(fields => {
+        this.hasValidated = true
+        return fields
+      })
   }
 
   _validateField(name, context){
