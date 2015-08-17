@@ -5,6 +5,8 @@ var stringOrArrayofStrings = React.PropTypes.oneOfType([
       React.PropTypes.arrayOf(React.PropTypes.string)
     ])
 
+var useRealContext = /^0\.14/.test(React.version);
+
 module.exports = Component =>
   class MessageListener extends React.Component {
 
@@ -19,14 +21,14 @@ module.exports = Component =>
     }
 
     getContext(){
-      return process.env.NODE_ENV !== 'production' 
+      return useRealContext
         ? this.context
         : this._reactInternalInstance._context
     }
 
     componentWillMount() {
       this._removeChangeListener = this.getContext()
-        .listen(() => this.setState(this._getValidationState()))  
+        .listen(() => this.setState(this._getValidationState()))
 
       this.setState(this._getValidationState())
     }
@@ -42,7 +44,7 @@ module.exports = Component =>
     _getValidationState(){
       var messages = this.getContext().messages(this.props.for, this.props.group);
 
-      return { 
+      return {
         messages,
         active: !!(messages && Object.keys(messages).length)
       }

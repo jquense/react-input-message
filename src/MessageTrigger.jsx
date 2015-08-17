@@ -8,6 +8,9 @@ var stringOrArrayOfStrings = React.PropTypes.oneOfType([
       React.PropTypes.arrayOf(React.PropTypes.string)
     ])
 
+var useRealContext = /^0\.14/.test(React.version);
+
+
 class MessageTrigger extends React.Component{
 
   static propTypes = {
@@ -31,7 +34,7 @@ class MessageTrigger extends React.Component{
 
 
   getContext(){
-    return process.env.NODE_ENV !== 'production' 
+    return useRealContext
       ? this.context
       : this._reactInternalInstance._context
   }
@@ -54,10 +57,10 @@ class MessageTrigger extends React.Component{
       , active = this.props.for && this.props.active
       , child = React.Children.only(this.props.children);
 
-    return React.cloneElement(child, { 
+    return React.cloneElement(child, {
 
       ...this._events(child.props),
-      
+
       className: cn(child.props.className, { [errClass]: active })
     })
   }
@@ -80,7 +83,7 @@ class MessageTrigger extends React.Component{
     else
       context.onValidateGroup(this.props.group, event, this, args)
 
-    handler 
+    handler
       && handler.apply(this, args)
   }
 }
@@ -95,7 +98,7 @@ function requiredIfNot(propName, propType){
 
     if (!props.hasOwnProperty(propName))
       type = type.isRequired
-    
+
     return type(props, name, componentName)
   }
 }

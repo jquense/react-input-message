@@ -163,7 +163,7 @@ module.exports = class ValidationContainer extends React.Component {
 
 function getChildren(props, context) {
 
-  if ( process.env.NODE_ENV !== 'production' ){
+  if (!/^0\.14/.test(React.version) && process.env.NODE_ENV !== 'production' ){
     // this is to avoid the warning but its hacky so lets do it a less hacky way in production
     return attachChildren(React.Children.only(props.children), context)
   }
