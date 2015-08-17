@@ -1,4 +1,5 @@
 var React = require('react')
+var shallowEqual = require('react-pure-render/shallowEqual')
 
 var stringOrArrayofStrings = React.PropTypes.oneOfType([
       React.PropTypes.string,
@@ -12,7 +13,8 @@ module.exports = Component =>
 
     static propTypes = {
       for:   stringOrArrayofStrings,
-      group: stringOrArrayofStrings
+      group: stringOrArrayofStrings,
+      immutable: React.PropTypes.bool
     }
 
     static contextTypes ={
@@ -24,6 +26,15 @@ module.exports = Component =>
       return useRealContext
         ? this.context
         : this._reactInternalInstance._context
+    }
+
+    shouldComponentUpdate(nextProps, nextState){
+      if (!this.state && nextState) return true;
+      if (this.state && !nextState) return true;
+      if (this.state.active !== nextState.active) return true;
+
+      return !shallowEqual(this.state.messages, nextState.messages)
+        || !shallowEqual(this.props, nextProps)
     }
 
     componentWillMount() {
