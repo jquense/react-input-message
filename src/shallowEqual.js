@@ -1,4 +1,15 @@
-function shallowEqual(objA, objB) {
+
+function isEql(a, b){
+  if (a === b) return true
+  if (typeof a !== typeof b) return false
+
+  if (Array.isArray(a))
+    return !a.some((a, idx) => a !== b[idx])
+
+  return false
+}
+
+function shallowEqual(objA, objB, eql = isEql) {
   if (objA === objB)
     return true;
 
@@ -25,12 +36,4 @@ function shallowEqual(objA, objB) {
   return true;
 }
 
-function eql(){
-  if (a === b) return true
-  if (typeof a !== typeof b) return false
-
-  if (Array.isArray(a))
-    return !a.some((a, idx) => a !== b[i])
-
-  return false
-}
+export default shallowEqual
