@@ -1,5 +1,5 @@
 var React = require('react')
-var shallowEqual = require('react-pure-render/shallowEqual')
+var shallowEqual = require('./shallowEqual')
 
 var stringOrArrayofStrings = React.PropTypes.oneOfType([
       React.PropTypes.string,
@@ -13,8 +13,7 @@ module.exports = Component =>
 
     static propTypes = {
       for:   stringOrArrayofStrings,
-      group: stringOrArrayofStrings,
-      immutable: React.PropTypes.bool
+      group: stringOrArrayofStrings
     }
 
     static contextTypes ={

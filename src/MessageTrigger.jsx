@@ -32,7 +32,6 @@ class MessageTrigger extends React.Component{
     activeClass: 'message-active'
   }
 
-
   getContext(){
     return useRealContext
       ? this.context

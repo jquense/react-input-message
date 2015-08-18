@@ -11,7 +11,6 @@ class Validator {
     this._errors = Object.create(null)
   }
 
-
   errors(names){
     if( (!names || !names.length) )
       return { ...this._errors }
