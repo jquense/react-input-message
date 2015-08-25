@@ -14,11 +14,12 @@ class Message extends React.Component {
   }
 
   render() {
-    var { 
+    var {
         component: Component
       , messages
       , active
       , delim
+      , filter = f => f
       , for: fieldFor
       , ...props } = this.props;
 
@@ -28,7 +29,12 @@ class Message extends React.Component {
 
     return (
       <Component {...props}>
-      { values(messages).reduce(flatten, []).join(delim) }
+      {
+        values(messages)
+          .reduce(flatten, [])
+          .filter(filter)
+          .join(delim)
+      }
       </Component>
     )
   }
