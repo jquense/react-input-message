@@ -18,7 +18,7 @@ describe('validator', function(){
         spy.should.have.been.calledWithExactly('field', context)
       })
   })
-  
+
   it('should use passed in validation function', () => {
     var spy
       , context = {}
@@ -63,12 +63,21 @@ describe('validator', function(){
     return validator.validate('fieldA').should.be.fulfilled
       .then(() => {
         validator.errors().should.have.key('fieldA')
-        
+
         return validator.validate('fieldA').should.be.fulfilled
           .then(() => {
             validator.errors().should.not.have.key('fieldA')
           })
       })
   })
-})
 
+  it('should track initial validation state', () => {
+    var validator = new Validator( field => 'invalid')
+    validator.hasValidated.should.equal(false)
+
+    return validator.validate('fieldA').should.be.fulfilled
+      .then(() => {
+        validator.hasValidated.should.equal(true)
+      })
+  })
+})
