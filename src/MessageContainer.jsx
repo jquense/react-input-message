@@ -1,7 +1,5 @@
 'use strict';
-var React   = require('react')
-  , ReactElement = require('react/lib/ReactElement');
-
+var React   = require('react');
 var uniq = array => array.filter((item, idx) => array.indexOf(item) == idx)
 
 let has = (obj, key) => obj && {}.hasOwnProperty.call(obj, key)
@@ -14,187 +12,99 @@ module.exports = class ValidationContainer extends React.Component {
 
   static propTypes = {
     messages:           React.PropTypes.object,
-    onValidationNeeded: React.PropTypes.func.isRequired
+    onValidationNeeded: React.PropTypes.func
   }
 
   static childContextTypes = {
-
-    onValidateFields: React.PropTypes.func,
-    onValidateGroup:  React.PropTypes.func,
-
-    messages:         React.PropTypes.func,
-
-    register:         React.PropTypes.func,
-    unregister:       React.PropTypes.func,
-
-    listen:           React.PropTypes.func
+    messageContainer: React.PropTypes.object,
   }
 
   constructor(props, context) {
     super(props, context)
-
     this._handlers = []
-
     this._groups = Object.create(null)
-    this._fields = Object.create(null)
 
-    this.state = {
-      children: getChildren(props, this.getChildContext())
-    };
+    this._messages = this._messages.bind(this)
   }
 
-  componentWillReceiveProps(nextProps){
-    this.setState({
-      children: getChildren(nextProps, this.getChildContext())
-    })
-  }
-
-  componentDidMount(){
-    this._emit()
-  }
-
-  componentDidUpdate(){
-    this._emit()
+  componentWillReceiveProps(nextProps) {
+    this._emit(nextProps)
   }
 
   getChildContext() {
 
-    // cache the value to avoid the damn owner/parent context warnings. TODO: remove in 0.14
     return this._context || (this._context = {
 
-      messages: this._messages.bind(this),
+      messageContainer: {
 
-      listen: (fn) => {
-        this._handlers.push(fn)
-        return () => this._handlers.splice(this._handlers.indexOf(fn), 1)
-      },
+        subscribe: listener => {
+          this._handlers.push(listener)
+          listener(this._listenerContext(this.props))
+          return () => this._handlers.splice(this._handlers.indexOf(listener), 1)
+        },
 
-      register: (names, group, target) => {
-        names = [].concat(names)
+        addToGroup: (group = '', fields) => {
+          group = this._groups[group] || (this._groups[group] = [])
+          fields = [].concat(fields)
 
-        names.forEach(name => this.addField(name, group, target))
+          fields.forEach(f => {
+            if (group.indexOf(f) === -1)
+              group.push(f)
+          })
 
-        return () => names.forEach( name => this.removeField(name, group))
-      },
+          return () => fields.forEach(
+            f => group.splice(group.indexOf(f), 1)
+          )
+        },
 
-      onValidateFields: (fields, event, target, args) => {
-        this.props.onValidationNeeded &&
-          this.props.onValidationNeeded({ event, fields, args, target })
-      },
+        onValidateFields: (fields, type, args) => {
+          this.props.onValidationNeeded &&
+            this.props.onValidationNeeded({ type, fields, args })
+        },
 
-      onValidateGroup: (group, event, target, args) => {
-        var fields = this.fields(group);
-
-        this.props.onValidationNeeded &&
-          this.props.onValidationNeeded({ event, fields, args, target })
+        onValidateGroup: (group, type, args) => {
+          var fields = this.fieldsForGroup(group);
+          this.props.onValidationNeeded &&
+            this.props.onValidationNeeded({ type, fields, args })
+        }
       }
     })
   }
 
-  addField(name, group, target) {
-    if ( !name ) return
-
-    this._fields[name] = target
-
-    if( !(!group || !group.length))
-      [].concat(group).forEach( grp => {
-        if( !has(this._groups, grp) )
-          return (this._groups[grp] = [name])
-
-        if( this._groups[grp].indexOf(name) === -1)
-          this._groups[grp].push(name)
-      })
-  }
-
-  removeField(name, group) {
-    var remove = (name, group) => {
-          var idx = this._groups[group].indexOf(name)
-
-          if(idx !== -1 ) this._groups[group].splice(idx, 1)
-        };
-
-    if ( !name )
-      return
-
-    if( group )
-      return remove(name, group)
-
-    for(var key in this._groups) if (has(this._groups, key))
-      remove(name, key)
-
-    this._fields[name] = false
+  _listenerContext(props){
+    return this._messages.bind(null, props.messages || {})
   }
 
   render() {
-    return this.state.children
+    return this.props.children
   }
 
-  fields(groups){
-    var isGroup = !(!groups || !groups.length)
-
+  fieldsForGroup(groups = Object.keys(this._groups)){
     groups = [].concat(groups)
-
-    return isGroup
-      ? uniq(groups.reduce((fields, group) => fields.concat(this._groups[group]), []))
-      : Object.keys(this._fields);
+    return uniq(groups.reduce(
+      (fields, group) => fields.concat(this._groups[group]), [])
+    )
   }
 
-  _emit(){
-    this._handlers.forEach(fn => fn())
+  _emit(props) {
+    let context = this._listenerContext(props);
+    this._handlers.forEach(fn => fn(context))
   }
 
-  _messages(names, groups){
-    if( (!names || !names.length) ){
-      if ( !groups || !groups.length)
-        return { ...this.props.messages }
+  _messages(messages, names, groups){
+    if (!names || !names.length) {
+      if (!groups || !groups.length)
+        return { ...messages }
 
-      names = this.fields(groups)
+      names = this.fieldsForGroup(groups)
     }
 
     return [].concat(names).reduce( (o, name) => {
-      if( this.props.messages[name])
-        o[name] = this.props.messages[name]
+      if (messages[name])
+        o[name] = messages[name]
 
       return o
     }, {})
   }
 
 }
-
-function getChildren(props, context) {
-
-  if (!/^0\.14/.test(React.version) && process.env.NODE_ENV !== 'production' ){
-    // this is to avoid the warning but its hacky so lets do it a less hacky way in production
-    return attachChildren(React.Children.only(props.children), context)
-  }
-  else
-    return props.children
-}
-
-function attachChildren(children, context) {
-
-  if ( typeof children === 'string' || React.isValidElement(children))
-    return clone(children)
-
-  return React.Children.map(children, clone)
-
-  function clone (child) {
-    if ( !React.isValidElement(child))
-      return child;
-
-    var props = child.props
-
-    if ( props.children )
-      props = { ...child.props, children: attachChildren(props.children, context) }
-
-    return new ReactElement(
-      child.type,
-      child.key,
-      child.ref,
-      child._owner,
-      { ...child._context, ...context},
-      props
-    )
-  }
-}
-

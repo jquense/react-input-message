@@ -1,8 +1,4 @@
-'use strict';
-var Validator = require('../src/Validator');
-
-
-
+let { Validator } = require('../src');
 
 
 describe('validator', function(){
@@ -18,7 +14,7 @@ describe('validator', function(){
         spy.should.have.been.calledWithExactly('field', context)
       })
   })
-  
+
   it('should use passed in validation function', () => {
     var spy
       , context = {}
@@ -35,15 +31,13 @@ describe('validator', function(){
       , validator = new Validator(spy = sinon.spy())
 
     return validator.validate(['fieldA', 'fieldB'])
-      .should.be.fulfilled.then(([ fieldA, fieldB ]) => {
-        fieldA.should.equal(true)
-        fieldB.should.equal(true)
+      .should.be.fulfilled.then(() => {
         spy.should.have.been.calledtwice
       })
   })
 
   it('should track errors', () => {
-    var validator = new Validator( field => 'invalid')
+    var validator = new Validator(field => 'invalid')
 
     return validator.validate(['fieldA', 'fieldB'])
       .should.be.fulfilled.then(() => {
@@ -63,7 +57,7 @@ describe('validator', function(){
     return validator.validate('fieldA').should.be.fulfilled
       .then(() => {
         validator.errors().should.have.key('fieldA')
-        
+
         return validator.validate('fieldA').should.be.fulfilled
           .then(() => {
             validator.errors().should.not.have.key('fieldA')
@@ -71,4 +65,3 @@ describe('validator', function(){
       })
   })
 })
-

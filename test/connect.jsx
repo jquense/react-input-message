@@ -1,46 +1,40 @@
-var React = require('react/addons')
-  , utils = React.addons.TestUtils
-  , { 
+import React from 'react';
+import $ from 'teaspoon';
+
+let {
     MessageContainer
   , MessageTrigger
   , Message } = require('../src');
 
-var findTag = utils.findRenderedDOMComponentWithTag
-  , findClass = utils.findRenderedDOMComponentWithClass
-  , findAllTag = utils.scryRenderedDOMComponentsWithTag
-  , findAllClass = utils.scryRenderedDOMComponentsWithClass
-  , findType = utils.findRenderedComponentWithType
-  , findAllType = utils.scryRenderedComponentsWithType
-  , trigger = utils.Simulate
 
 describe('Message', ()=>{
 
   it('should use the prop Component', function(){
-    var inst = utils.renderIntoDocument(
+    var inst = $(
       <MessageContainer messages={{ fieldA: 'hi', fieldB: 'good day' }} >
         <div>
           <Message for='fieldA' className='msg' component='p'/>
         </div>
       </MessageContainer>)
 
-    var messages = findTag(inst, 'p');
+    inst.render().single('p')
   })
 
   it('should allow empty `for`', function(){
-    var inst = utils.renderIntoDocument(
+    var inst = $(
       <MessageContainer messages={{ fieldA: 'hi', fieldB: 'good day' }} >
         <div>
           <Message className='msg'/>
         </div>
       </MessageContainer>)
 
-    var messages = findType(inst, Message._Message);
+    var messages = inst.render().single(Message._Message)[0];
 
     messages.props.messages.should.eql({ fieldA: 'hi', fieldB: 'good day' })
   })
 
   it('should allow group summaries', function(){
-    var inst = utils.renderIntoDocument(
+    var inst = $(
       <MessageContainer messages={{ fieldA: 'hi', fieldB: 'good day' }} >
         <div>
           <MessageTrigger for='fieldA' group='test'>
@@ -50,7 +44,7 @@ describe('Message', ()=>{
         </div>
       </MessageContainer>)
 
-    var messages = findType(inst, Message._Message);
+    var messages = inst.render().single(Message._Message)[0];
 
     messages.props.messages.should.eql({ fieldA: 'hi' })
   })

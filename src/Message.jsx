@@ -1,6 +1,5 @@
 'use strict';
 var React = require('react')
-  , cn = require('classnames')
   , connectToMessageContainer = require('./connectToMessageContainer');
 
 let values = obj => Object.keys(obj).map( k => obj[k] )
@@ -10,7 +9,7 @@ class Message extends React.Component {
 
   static defaultProps = {
     component: 'span',
-    delim: ', '
+    delim: ', ',
   }
 
   render() {
@@ -19,7 +18,8 @@ class Message extends React.Component {
       , messages
       , active
       , delim
-      , filter = f => f
+      , extract = f => f
+      , filter = f => true
       , for: fieldFor
       , ...props } = this.props;
 
@@ -33,6 +33,7 @@ class Message extends React.Component {
         values(messages)
           .reduce(flatten, [])
           .filter(filter)
+          .map(extract)
           .join(delim)
       }
       </Component>

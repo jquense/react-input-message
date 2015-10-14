@@ -1,6 +1,6 @@
 'use strict';
 var React = require('react')
-  , cn = require('classnames')
+  , Bridge = require('topeka/ChildBridge')
   , connectToMessageContainer = require('./connectToMessageContainer');
 
 var stringOrArrayOfStrings = React.PropTypes.oneOfType([
@@ -8,96 +8,90 @@ var stringOrArrayOfStrings = React.PropTypes.oneOfType([
       React.PropTypes.arrayOf(React.PropTypes.string)
     ])
 
-var useRealContext = /^0\.14/.test(React.version);
-
 
 class MessageTrigger extends React.Component{
 
   static propTypes = {
-    events:      React.PropTypes.arrayOf(React.PropTypes.string),
-    activeClass: React.PropTypes.string,
+    events: stringOrArrayOfStrings,
+    inject: React.PropTypes.func,
 
     for:   stringOrArrayOfStrings,
     group: stringOrArrayOfStrings
   }
 
   static contextTypes = {
-    onValidateFields: React.PropTypes.func,
-    onValidateGroup:  React.PropTypes.func,
-    register:         React.PropTypes.func
+    messageContainer: React.PropTypes.object,
   }
 
   static defaultProps = {
-    events: [ 'onChange' ],
-    activeClass: 'message-active'
+    events: 'onChange',
   }
 
-  getContext(){
-    return useRealContext
-      ? this.context
-      : this._reactInternalInstance._context
+  constructor(){
+    super()
+    this._inject = this._inject.bind(this);
+    this._notify = this._notify.bind(this);
   }
 
   componentWillMount(){
-    this._unregister = this.getContext().register(this.props.for, this.props.group, this)
-  }
+    if (!this.props.for || !this.props.for.length)
+      return
 
-  componentWillUnmount() {
-    this._unregister()
+    this._removeFromGroup = this.context.messageContainer.addToGroup(
+        this.props.group
+      , this.props.for
+    )
   }
 
   componentWillReceiveProps(nextProps) {
-    this._unregister()
-    this._unregister = this.getContext().register(nextProps.for, nextProps.group, this)
+    this._removeFromGroup &&
+      this._removeFromGroup()
+
+    if (!nextProps.for || !nextProps.for.length)
+      return
+
+    this._removeFromGroup = this.context.messageContainer.addToGroup(
+        nextProps.group
+      , nextProps.for
+    )
+  }
+
+  componentWillUnmount() {
+    this._removeFromGroup &&
+      this._removeFromGroup()
   }
 
   render() {
-    var errClass = this.props.activeClass
-      , active = this.props.for && this.props.active
-      , child = React.Children.only(this.props.children);
-
-    return React.cloneElement(child, {
-
-      ...this._events(child.props),
-
-      className: cn(child.props.className, { [errClass]: active })
-    })
+    return (
+      <Bridge
+        inject={this._inject}
+        events={this.props.events}
+        onEvent={this._notify}
+      >
+        {this.props.children}
+      </Bridge>
+    )
   }
 
-  _events(childProps){
-    var notify = this._notify;
+  _inject(child) {
+    var active = this.props.for && this.props.active;
 
-    return this.props.events.reduce((map, evt) => {
-      map[evt] = notify.bind(this, childProps[evt], evt)
-      return map
-    }, {})
+    if (this.props.inject)
+      return this.props.inject(child, !!active)
   }
 
-  _notify(handler, event, ...args){
-    var context = this.getContext()
+  _notify(event, handler, ...args){
+    var container = this.context.messageContainer
       , forProps = this.props.for ? [].concat(this.props.for) : [];
-
-    if( forProps.length )
-      context.onValidateFields(forProps, event, this, args)
-    else
-      context.onValidateGroup(this.props.group, event, this, args)
 
     handler
       && handler.apply(this, args)
+
+    if (forProps.length)
+      container.onValidateFields(forProps, event, args)
+    else
+      container.onValidateGroup(this.props.group, event, args)
   }
 }
 
 module.exports = connectToMessageContainer(MessageTrigger)
-
-function requiredIfNot(propName, propType){
-  var type = React.PropTypes.string
-
-  return function(props, name, componentName){
-    var type = propType
-
-    if (!props.hasOwnProperty(propName))
-      type = type.isRequired
-
-    return type(props, name, componentName)
-  }
-}

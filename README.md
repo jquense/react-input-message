@@ -1,8 +1,14 @@
 # react-input-message
 
-A small, completely unopinionated way, to display messages next to inputs based on events. Helpful for displaying input validation messages. 
+A small, completely unopinionated way, to display messages next to inputs based on events.
+Helpful for displaying input validation messages.
 
-There is a frustrating trend in javascript form validation solutions that couple the view concerns of a form (hiding/showing of messages) with some specific data layer model, or abstraction. This often means that in order to use a form validator you also need to use a specifc js schema validator, or are tied into using a specifc validation library. `react-input-message` strives to provide _just_ a solution to quickly and easily annotating form controls without requiring that you use a specific validation or data schema library.
+There is a frustrating trend in javascript form validation solutions that couple the view concerns of a form
+(hiding/showing of messages) with some specific data layer model, or abstraction.
+This often means that in order to use a form validator you also need to use a specific js schema validator,
+or are tied into using a specific validation library. `react-input-message` strives to
+provide _just_ a solution to quickly and easily annotating form controls without requiring that you use a
+specific validation or data schema library.
 
 ## Install
 
@@ -12,7 +18,8 @@ npm i -S jquense/react-input-message
 
 ## Use
 
-You render your inputs as you normally would, except that you wrap them inside a `MessageTrigger` component which will watch its child input for events.
+You render your inputs as you normally would, except that you wrap them inside a `MessageTrigger`
+component which will watch its child input for events.
 
 ```js
 render(){
@@ -21,23 +28,23 @@ render(){
   }
 
   return (
-    <MessageContainer 
+    <MessageContainer
       messages={messages}
       onValidationNeeded={handleValidationRequest}
     >
       <form>
         <div>
           <label>Name</label>
-          {/* the `events` prop tells the MessageContainer what 
+          {/* the `events` prop tells the MessageContainer what
             * events to trigger a `onValidationNeeded` handler for */}
           <MessageTrigger for='name' events={[ 'onChange', 'onBlur']}>
-            <input type='text' 
-              value={this.state.name} 
+            <input type='text'
+              value={this.state.name}
               onChange={handleChange}
             />
           </MessageTrigger>
 
-          {/* A `Message` Component will display field specific 
+          {/* A `Message` Component will display field specific
             * messages (as provided by the `messages` prop) */}
           <Message for='name'/>
         </div>
@@ -53,46 +60,76 @@ render(){
 ```
 
 
-`react-input-message` exports 3 simple components and a utility class: 
+`react-input-message` exports 3 simple components and a utility class:
 
 #### `MessageContainer`
 
 __Props__
 
-  - `onValidationNeeded`: a handler that fires for each `MessageTrigger` component with a `for` prop
-  - `messages`: a hash of field names (`for` prop values) and either a string, or an array of strings 
+__`onValidationNeeded`__: a handler that fires for each `MessageTrigger` component with a `for` prop
+
+__`messages`__: a hash of unique names (`for` prop values) and either a string, or an array of strings.
 
 
 #### `MessageTrigger`
 
-A MessageTrigger is a commponent that listens to its child for events and triggers a validation event in the containing `MessageContainer`. Generally this will be an input component.
+A MessageTrigger is a commponent that listens to its child for events and triggers a
+validation event in the containing `MessageContainer`. Generally this will be an input component.
 
 __props__
-  - `for`: a field name or path. specifying a `for` prop identifies the Trigger as "something that will need validation". Triggers that exclude a `for` prop won't be the subject of an onValidation event themselves but can trigger validations for other triggers (via groups)
-  - `group`: an arbitrary group name that allows inputs to be triggered together. If a `for` prop is specified then the `group` prop identifies the trigger as a member of that group. If the `for` prop is excluded then the `group` prop identifies which group to trigger validation for.
-  - `activeClass`: a class to be added to the input if its field is currently active
-  - `events`: default(['onChange']) an array of prop handlers that the MessageTrigger will list on, and trigger a `onValidationNeeded` event in the Container
 
-Leaving the `for` prop `undefined` is a good way to create buttons that can trigger validation for a group (or the entire container), but will not be the subject of a validation itself.
+__`for`__: a unique name or array of names. The `for` prop uniquely identifies what `onValidationNeeded`
+is being triggered _for_. `for` values should map to possible `messages` keys
+
+__`group`__: an arbitrary group name that allows inputs to be triggered together. If a `for` prop is specified then
+the `group` prop identifies the trigger as a member of that group. If the `for` prop is
+excluded then the `group` prop identifies which group to trigger validation for.
+
+__`inject`__: a function that is passed the child and `active` . returns an object of props to add to the child.
+
+```js
+function inject(child, isActive){
+  return {
+    className: classnames(child.props.className, {
+      'message-error': isActive
+    })
+  }
+}
+
+<MessageTrigger inject={inject}/>
+```
+
+__`events`__: default(['onChange']) an array of prop handlers that the MessageTrigger will list on,
+and trigger a `onValidationNeeded` event in the Container
+
+Leaving the `for` prop `undefined` is a good way to create buttons that can trigger validation for a
+group (or the entire container), but will not be the subject of a validation itself.
 
 #### `Message`
 
-  Displays the actual messages for a field, the default implementation just concats the messages together with `, ` but you can easily create custom Message components with the `connectToMessageContainer()` helper
+Displays the actual messages for a field, the default implementation just concats the messages together with `, `
+but you can easily create custom Message components with the `connectToMessageContainer()` helper
 
 #### `connectToMessageContainer(componentClass)`
 
-in lieu of mixins you can use this helper function to wrap a component so that it passed the MessageContainer state as props. The following will be passed to your `componentClass` as props:
+in lieu of mixins you can use this helper function to wrap a component so that it passed the MessageContainer
+state as props. The following will be passed to your `componentClass` as props:
 
-- `messages`: will be for the specificed field (via the `for` prop)
-- `active`: if you provide a `for` prop this prop will be true or false based on whether there are any active messages
+__`messages`__: will be for the specified field (via the `for` prop)
+
+__`active`__: if you provide a `for` prop this prop will be true or false based on whether there are any active messages.
 
 #### `Validator(validationFn)`
 
-A very simple basic form validator class, to help manage input error state, use is completely optional. It is designed to nicely hook up to the `MessageContainer` component without being tightly coupled to it.
+A very simple basic form validator class, to help manage input error state, use is completely optional.
+It is designed to nicely hook up to the `MessageContainer` component without being tightly coupled to it.
 
-  - `validate(fields, [ context ])` returns a promise that resolves with the valid state of the field. You can validate multiple fields by passing an array. You can also pass in a `context` object which will be passed to the `validationFn`
-  - `isValid`: checks if a field is currently in an error state
-  - `errors([fields])`: return a hash of errors, you can pass this object directly to a `MessageContainer` messages prop
+__`validate(fields, [ context ])`__ returns a promise that resolves with the valid state of the field.
+You can validate multiple fields by passing an array. You can also pass in a `context` object which will be passed to the `validationFn`
+
+__`isValid`__: checks if a field is currently in an error state
+
+__`errors([fields])`__: return a hash of errors, you can pass this object directly to a `MessageContainer` messages prop
 
 ```js
 let model = { name: '' }
@@ -101,8 +138,8 @@ let model = { name: '' }
 let validator = new Validator(function(fieldName, context){
   let isValid = !!context.model[fieldName]
 
-  if ( isValid === false)
-    return [ fieldName + ': is required!'] 
+  if (isValid === false)
+    return [ fieldName + ': is required!']
 })
 
 validator.validate('fieldName', { model: model })
@@ -112,4 +149,3 @@ validator.validate('fieldName', { model: model })
 
 validator.isValid('fieldName')
 ```
-

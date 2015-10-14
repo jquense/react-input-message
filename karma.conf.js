@@ -1,17 +1,17 @@
 'use strict';
+require('babel/register')()
 
 module.exports = function (config) {
-  
+
   config.set({
 
     basePath: '',
 
-    frameworks: ['mocha'],
+    frameworks: ['mocha', 'sinon-chai'],
 
     reporters: ['mocha'],
 
     files: [
-      'vendor/sinon-1.10.3.js', //because sinon hates webpack
       '_test.js'
     ],
 
@@ -22,13 +22,13 @@ module.exports = function (config) {
 
     logLevel: config.LOG_INFO,
 
-    browsers: ['PhantomJS'], 
+    browsers: ['jsdom'],
 
     preprocessors: {
       '_test.js': ['webpack', 'sourcemap']
     },
 
-    webpack: require('./webpack.configs').test,
+    webpack: require('./webpack/test-config.babel'),
 
     webpackServer: {
       noInfo: true

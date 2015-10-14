@@ -6,25 +6,18 @@ var stringOrArrayofStrings = React.PropTypes.oneOfType([
       React.PropTypes.arrayOf(React.PropTypes.string)
     ])
 
-var useRealContext = /^0\.14/.test(React.version);
-
 module.exports = Component =>
   class MessageListener extends React.Component {
+
+    static DecoratedComponent = Component
 
     static propTypes = {
       for:   stringOrArrayofStrings,
       group: stringOrArrayofStrings
     }
 
-    static contextTypes ={
-      messages: React.PropTypes.func,
-      listen:   React.PropTypes.func
-    }
-
-    getContext(){
-      return useRealContext
-        ? this.context
-        : this._reactInternalInstance._context
+    static contextTypes = {
+      messageContainer: React.PropTypes.object
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -37,27 +30,27 @@ module.exports = Component =>
     }
 
     componentWillMount() {
-      this._removeChangeListener = this.getContext()
-        .listen(() => this.setState(this._getValidationState()))
+      let container = this.context.messageContainer;
 
-      this.setState(this._getValidationState())
+      this.unsubscribe = container.subscribe(getMessages => {
+        this.setState(this._getValidationState(getMessages))
+      })
     }
 
     componentWillUnmount() {
-      this._removeChangeListener()
+      this.unsubscribe()
     }
 
     render(){
       return <Component {...this.props} {...this.state}/>
     }
 
-    _getValidationState(){
-      var messages = this.getContext().messages(this.props.for, this.props.group);
+    _getValidationState(getMessages){
+      var messages = getMessages(this.props.for, this.props.group);
 
       return {
         messages,
         active: !!(messages && Object.keys(messages).length)
       }
     }
-
   }

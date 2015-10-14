@@ -1,23 +1,16 @@
-var React = require('react/addons')
-  , utils = React.addons.TestUtils
-  , { 
+import React from 'react';
+import $ from 'teaspoon';
+
+let {
     MessageContainer
   , MessageTrigger
   , Message } = require('../src');
-
-var findTag = utils.findRenderedDOMComponentWithTag
-  , findClass = utils.findRenderedDOMComponentWithClass
-  , findAllTag = utils.scryRenderedDOMComponentsWithTag
-  , findAllClass = utils.scryRenderedDOMComponentsWithClass
-  , findType = utils.findRenderedComponentWithType
-  , findAllType = utils.scryRenderedComponentsWithType
-  , trigger = utils.Simulate
 
 describe('Trigger', ()=>{
 
   it('should trigger event for path', function(){
     var spy = sinon.spy()
-      , inst = utils.renderIntoDocument(
+      , inst = $(
       <MessageContainer onValidationNeeded={spy} >
         <div>
           <MessageTrigger for='fieldA'>
@@ -26,8 +19,7 @@ describe('Trigger', ()=>{
         </div>
       </MessageContainer>)
 
-    
-    trigger.change(findTag(inst, 'input').getDOMNode())
+    inst.render().find('input').trigger('change')
 
     spy.should.have.been.calledOnce
     spy.args[0][0].fields.should.eql(['fieldA'])
@@ -35,7 +27,7 @@ describe('Trigger', ()=>{
 
   it('should trigger event once with multiple fields', function(){
     var spy = sinon.spy()
-      , inst = utils.renderIntoDocument(
+      , inst = $(
       <MessageContainer onValidationNeeded={spy} >
         <div>
           <MessageTrigger for={['fieldA', 'fieldB']}>
@@ -44,7 +36,7 @@ describe('Trigger', ()=>{
         </div>
       </MessageContainer>)
 
-    trigger.change(findTag(inst, 'input').getDOMNode())
+    inst.render().find('input').trigger('change')
 
     spy.should.have.been.calledOnce
     spy.args[0][0].fields.should.eql(['fieldA', 'fieldB'])
