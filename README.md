@@ -13,7 +13,7 @@ specific validation or data schema library.
 ## Install
 
 ```sh
-npm i -S jquense/react-input-message
+npm i -S react-input-message
 ```
 
 ## Use
