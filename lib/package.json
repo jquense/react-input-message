@@ -1,0 +1,22 @@
+{
+  "name": "react-input-message",
+  "description": "unopinionated form input annotation",
+  "version": "0.8.0",
+  "repository": {
+    "url": "git://github.com/jquense/react-input-message.git"
+  },
+  "author": "@monasticpanic Jason Quense",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jquense/react-input-message/issues"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "classnames": "^1.1.4",
+    "promise": "^7.0.3",
+    "topeka": "^0.1.3"
+  },
+  "peerDependencies": {
+    "react": "^0.14.0-alpha1"
+  }
+}
