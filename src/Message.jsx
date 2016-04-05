@@ -10,6 +10,8 @@ class Message extends React.Component {
   static defaultProps = {
     component: 'span',
     delim: ', ',
+    extract: f => f,
+    filter: f => true
   }
 
   render() {
@@ -18,8 +20,8 @@ class Message extends React.Component {
       , messages
       , active
       , delim
-      , extract = f => f
-      , filter = f => true
+      , extract
+      , filter
       , for: fieldFor
       , ...props } = this.props;
 
@@ -32,7 +34,7 @@ class Message extends React.Component {
       {
         values(messages)
           .reduce(flatten, [])
-          .filter(filter)
+          .filter((v, i, l) => filter(v, i, l, extract))
           .map(extract)
           .join(delim)
       }
