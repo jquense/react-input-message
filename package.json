@@ -22,7 +22,7 @@
   "dependencies": {
     "classnames": "^1.1.4",
     "promise": "^7.0.3",
-    "topeka": "^0.1.3"
+    "topeka": "^0.3.0"
   },
   "peerDependencies": {
     "react": "^0.14.0 || ^15.0.0"
