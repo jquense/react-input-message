@@ -20,7 +20,7 @@
     "release": "release"
   },
   "dependencies": {
-    "classnames": "^1.1.4",
+    "classnames": "^2.2.3",
     "promise": "^7.0.3",
     "topeka": "^0.3.0"
   },
