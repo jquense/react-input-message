@@ -1,6 +1,6 @@
 'use strict';
 var React   = require('react')
-  , Promise = require('promise/lib/es6-extensions');
+  , Promise = require('universal-promise');
 
 class Validator {
 

@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "classnames": "^2.2.3",
-    "promise": "^7.0.3",
-    "topeka": "^0.3.0"
+    "topeka": "^0.3.0",
+    "universal-promise": "^1.1.0"
   },
   "peerDependencies": {
     "react": "^0.14.0 || ^15.0.0"
@@ -70,7 +70,6 @@
     "webpack-dev-server": "^1.7.0"
   },
   "release-script": {
-    "defaultDryRun": "false",
     "altPkgRootFolder": "lib"
   }
 }
