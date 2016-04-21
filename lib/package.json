@@ -1,7 +1,7 @@
 {
   "name": "react-input-message",
   "description": "unopinionated form input annotation",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "repository": {
     "url": "git://github.com/jquense/react-input-message.git"
   },
@@ -12,9 +12,9 @@
   },
   "main": "index.js",
   "dependencies": {
-    "classnames": "^1.1.4",
-    "promise": "^7.0.3",
-    "topeka": "^0.3.0"
+    "classnames": "^2.2.3",
+    "topeka": "^0.3.0",
+    "universal-promise": "^1.1.0"
   },
   "peerDependencies": {
     "react": "^0.14.0 || ^15.0.0"
