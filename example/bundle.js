@@ -21263,7 +21263,8 @@
 	      _React$Component.apply(this, arguments);
 	    }
 	
-	    MessageListener.prototype.shouldComponentUpdate = function shouldComponentUpdate(nextProps, nextState) {
+	    MessageListener.prototype.shouldComponentUpdate = function shouldComponentUpdate(nextProps, nextState, nextContext) {
+	      if (!(nextContext || {}).messageContainer) return true;
 	      if (!this.state && nextState) return true;
 	      if (this.state && !nextState) return true;
 	      if (this.state.active !== nextState.active) return true;
@@ -21276,13 +21277,15 @@
 	
 	      var container = this.context.messageContainer;
 	
-	      this.unsubscribe = container.subscribe(function (getMessages) {
-	        _this.setState(_this._getValidationState(getMessages));
-	      });
+	      if (container) {
+	        this.unsubscribe = container.subscribe(function (getMessages) {
+	          _this.setState(_this._getValidationState(getMessages));
+	        });
+	      }
 	    };
 	
 	    MessageListener.prototype.componentWillUnmount = function componentWillUnmount() {
-	      this.unsubscribe();
+	      this.unsubscribe && this.unsubscribe();
 	    };
 	
 	    MessageListener.prototype.render = function render() {

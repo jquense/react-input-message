@@ -34,7 +34,7 @@ class MessageTrigger extends React.Component{
   }
 
   componentWillMount(){
-    if (!this.props.for || !this.props.for.length)
+    if (!this.context.messageContainer || !this.props.for || !this.props.for.length)
       return
 
     this._removeFromGroup = this.context.messageContainer.addToGroup(
@@ -43,11 +43,11 @@ class MessageTrigger extends React.Component{
     )
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps, nextContext) {
     this._removeFromGroup &&
       this._removeFromGroup()
 
-    if (!nextProps.for || !nextProps.for.length)
+    if (!nextContext.messageContainer || !nextProps.for || !nextProps.for.length)
       return
 
     this._removeFromGroup = this.context.messageContainer.addToGroup(
@@ -87,6 +87,7 @@ class MessageTrigger extends React.Component{
     handler
       && handler.apply(this, args)
 
+    if (!container) return
     if (forProps.length)
       container.onValidateFields(forProps, event, args)
     else
