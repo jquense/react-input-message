@@ -20,7 +20,8 @@ module.exports = Component =>
       messageContainer: React.PropTypes.object
     }
 
-    shouldComponentUpdate(nextProps, nextState){
+    shouldComponentUpdate(nextProps, nextState, nextContext){
+      if (!(nextContext || {}).messageContainer) return true
       if (!this.state && nextState) return true;
       if (this.state && !nextState) return true;
       if (this.state.active !== nextState.active) return true;
@@ -32,13 +33,15 @@ module.exports = Component =>
     componentWillMount() {
       let container = this.context.messageContainer;
 
-      this.unsubscribe = container.subscribe(getMessages => {
-        this.setState(this._getValidationState(getMessages))
-      })
+      if (container) {
+        this.unsubscribe = container.subscribe(getMessages => {
+          this.setState(this._getValidationState(getMessages))
+        });
+      }
     }
 
     componentWillUnmount() {
-      this.unsubscribe()
+      this.unsubscribe && this.unsubscribe()
     }
 
     render(){
