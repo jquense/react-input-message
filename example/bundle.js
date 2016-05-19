@@ -21099,15 +21099,15 @@
 	  }
 	
 	  MessageTrigger.prototype.componentWillMount = function componentWillMount() {
-	    if (!this.props['for'] || !this.props['for'].length) return;
+	    if (!this.context.messageContainer || !this.props['for'] || !this.props['for'].length) return;
 	
 	    this._removeFromGroup = this.context.messageContainer.addToGroup(this.props.group, this.props['for']);
 	  };
 	
-	  MessageTrigger.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
+	  MessageTrigger.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps, nextContext) {
 	    this._removeFromGroup && this._removeFromGroup();
 	
-	    if (!nextProps['for'] || !nextProps['for'].length) return;
+	    if (!nextContext.messageContainer || !nextProps['for'] || !nextProps['for'].length) return;
 	
 	    this._removeFromGroup = this.context.messageContainer.addToGroup(nextProps.group, nextProps['for']);
 	  };
@@ -21144,6 +21144,7 @@
 	
 	    handler && handler.apply(this, args);
 	
+	    if (!container) return;
 	    if (forProps.length) container.onValidateFields(forProps, event, args);else container.onValidateGroup(this.props.group, event, args);
 	  };
 	
