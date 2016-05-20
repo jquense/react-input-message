@@ -8,21 +8,21 @@ let remove = (array, item) => array.filter(i => i !== item)
 
 export default class MessageContainer extends React.Component {
 
-  static defaultProps = {
-    messages: Object.create(null)
-  }
-
   static propTypes = {
     messages:           React.PropTypes.object,
     onValidationNeeded: React.PropTypes.func
+  }
+
+  static defaultProps = {
+    messages: Object.create(null)
   }
 
   static childContextTypes = {
     messageContainer: React.PropTypes.object,
   }
 
-  constructor(props, context) {
-    super(props, context)
+  constructor(...args) {
+    super(...args)
     this._handlers = []
     this._groups = Object.create(null)
   }
@@ -46,18 +46,18 @@ export default class MessageContainer extends React.Component {
   }
 
   namesForGroup = groups => {
-    groups = Object.keys(this._groups)
+    groups = groups || Object.keys(this._groups)
     groups = [].concat(groups)
-
     return uniq(groups.reduce(
       (fields, group) => fields.concat(this._groups[group]), [])
     )
   };
 
   addToGroup = (grpName, names) => {
-    let group = this._groups[grpName]
-
+    grpName = grpName || '@@unassigned-group';
     names = names && [].concat(names)
+
+    let group = this._groups[grpName]
 
     if (!names || !names.length)
       return

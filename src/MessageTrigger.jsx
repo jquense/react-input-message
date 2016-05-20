@@ -109,7 +109,7 @@ class MessageTrigger extends React.Component{
     this.removeFromGroup &&
       this.removeFromGroup()
 
-    if (!messageContainer || !group || !forNames)
+    if (!messageContainer || !forNames)
       return
 
     this.removeFromGroup =
@@ -120,7 +120,8 @@ class MessageTrigger extends React.Component{
     let { messageContainer } = context;
     let { 'for': forNames, group } = props;
 
-    if (!forNames && group && messageContainer)
+    // falsy groups will return all form fields
+    if (!forNames && messageContainer)
       forNames = messageContainer.namesForGroup(group);
 
     return forNames ? [].concat(forNames) : [];

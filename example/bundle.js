@@ -21475,7 +21475,7 @@
 	    return _react2.default.createElement(
 	      Component,
 	      props,
-	      children(activeMessages)
+	      children(values(activeMessages).reduce(flatten, []))
 	    );
 	  };
 	
@@ -21506,7 +21506,7 @@
 	  messagesForNames: messagesForNames,
 	  component: 'span',
 	  children: function children(messages) {
-	    return values(messages).reduce(flatten, []).join(', ');
+	    return messages.join(', ');
 	  }
 	};
 	Message.contextTypes = {

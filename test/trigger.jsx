@@ -40,4 +40,61 @@ describe('Trigger', ()=>{
     spy.should.have.been.calledOnce
     spy.args[0][0].fields.should.eql(['fieldA', 'fieldB'])
   })
+
+  it('should trigger group', function(done) {
+    function spy({ fields }) {
+      fields.should.eql(['fieldA'])
+      done()
+    }
+
+    var inst = $(
+      <MessageContainer onValidationNeeded={spy}>
+        <div>
+          <MessageTrigger for={'fieldA'} group='foo'>
+            <input />
+          </MessageTrigger>
+          <MessageTrigger for={'fieldB'}>
+            <input />
+          </MessageTrigger>
+
+          <MessageTrigger events='onClick' group='foo'>
+            <button />
+          </MessageTrigger>
+        </div>
+      </MessageContainer>)
+
+    inst.render()
+      .single('button')
+      .trigger('click');
+  })
+
+  it('should trigger entire form', function(done) {
+    function spy({ fields }) {
+      fields.should.eql([
+        'fieldA',
+        'fieldB',
+      ])
+      done()
+    }
+
+    var inst = $(
+      <MessageContainer onValidationNeeded={spy}>
+        <div>
+          <MessageTrigger for={'fieldA'} group='foo'>
+            <input />
+          </MessageTrigger>
+          <MessageTrigger for={'fieldB'}>
+            <input />
+          </MessageTrigger>
+
+          <MessageTrigger events='onClick'>
+            <button />
+          </MessageTrigger>
+        </div>
+      </MessageContainer>)
+
+    inst.render()
+      .single('button')
+      .trigger('click');
+  })
 })
