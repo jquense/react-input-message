@@ -20941,10 +20941,14 @@
 	var MessageContainer = function (_React$Component) {
 	  _inherits(MessageContainer, _React$Component);
 	
-	  function MessageContainer(props, context) {
+	  function MessageContainer() {
 	    _classCallCheck(this, MessageContainer);
 	
-	    var _this = _possibleConstructorReturn(this, _React$Component.call(this, props, context));
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+	
+	    var _this = _possibleConstructorReturn(this, _React$Component.call.apply(_React$Component, [this].concat(args)));
 	
 	    _initialiseProps.call(_this);
 	
@@ -20990,12 +20994,12 @@
 	  return MessageContainer;
 	}(_react2.default.Component);
 	
-	MessageContainer.defaultProps = {
-	  messages: Object.create(null)
-	};
 	MessageContainer.propTypes = {
 	  messages: _react2.default.PropTypes.object,
 	  onValidationNeeded: _react2.default.PropTypes.func
+	};
+	MessageContainer.defaultProps = {
+	  messages: Object.create(null)
 	};
 	MessageContainer.childContextTypes = {
 	  messageContainer: _react2.default.PropTypes.object
@@ -21005,18 +21009,18 @@
 	  var _this2 = this;
 	
 	  this.namesForGroup = function (groups) {
-	    groups = Object.keys(_this2._groups);
+	    groups = groups || Object.keys(_this2._groups);
 	    groups = [].concat(groups);
-	
 	    return uniq(groups.reduce(function (fields, group) {
 	      return fields.concat(_this2._groups[group]);
 	    }, []));
 	  };
 	
 	  this.addToGroup = function (grpName, names) {
-	    var group = _this2._groups[grpName];
-	
+	    grpName = grpName || '@@unassigned-group';
 	    names = names && [].concat(names);
+	
+	    var group = _this2._groups[grpName];
 	
 	    if (!names || !names.length) return;
 	
@@ -21162,7 +21166,7 @@
 	
 	    this.removeFromGroup && this.removeFromGroup();
 	
-	    if (!messageContainer || !group || !forNames) return;
+	    if (!messageContainer || !forNames) return;
 	
 	    this.removeFromGroup = messageContainer.addToGroup(group, forNames);
 	  };
@@ -21174,8 +21178,9 @@
 	    var forNames = props['for'];
 	    var group = props.group;
 	
+	    // falsy groups will return all form fields
 	
-	    if (!forNames && group && messageContainer) forNames = messageContainer.namesForGroup(group);
+	    if (!forNames && messageContainer) forNames = messageContainer.namesForGroup(group);
 	
 	    return forNames ? [].concat(forNames) : [];
 	  };
@@ -21412,8 +21417,6 @@
 	};
 	
 	function messagesForNames(names, messages) {
-	  if (!names.length) return messages;
-	
 	  var messagesForNames = {};
 	
 	  names.forEach(function (name) {
@@ -21435,38 +21438,36 @@
 	  }
 	
 	  Message.prototype.componentWillMount = function componentWillMount() {
-	    var _props = this.props;
-	    var messagesForNames = _props.messagesForNames;
-	    var messages = _props.messages;
-	
-	    var props = _objectWithoutProperties(_props, ['messagesForNames', 'messages']);
-	
-	    this.setState({
-	      messages: messagesForNames.apply(undefined, [this.resolveNames(), messages].concat(props))
-	    });
+	    this.setState(this.getMessageState(this.props, this.context));
 	  };
 	
 	  Message.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps, nextContext) {
-	    var messagesForNames = nextProps.messagesForNames;
-	    var messages = nextProps.messages;
+	    this.setState(this.getMessageState(nextProps, nextContext));
+	  };
 	
-	    var props = _objectWithoutProperties(nextProps, ['messagesForNames', 'messages']);
+	  Message.prototype.getMessageState = function getMessageState(props, context) {
+	    var messagesForNames = props.messagesForNames;
+	    var messages = props.messages;
 	
-	    this.setState({
-	      messages: messagesForNames.apply(undefined, [this.resolveNames(nextProps, nextContext), messages].concat(props))
-	    });
+	    var args = _objectWithoutProperties(props, ['messagesForNames', 'messages']);
+	
+	    var names = this.resolveNames(props, context);
+	
+	    messages = names == null ? messages : messagesForNames(names, messages, args);
+	
+	    return { messages: messages };
 	  };
 	
 	  Message.prototype.render = function render() {
-	    var _props2 = this.props;
+	    var _props = this.props;
 	    var
 	    /* eslint-disable no-unused-vars */
-	    messages = _props2.messages;
-	    var fieldFor = _props2.for;
-	    var Component = _props2.component;
-	    var children = _props2.children;
+	    messages = _props.messages;
+	    var fieldFor = _props.for;
+	    var Component = _props.component;
+	    var children = _props.children;
 	
-	    var props = _objectWithoutProperties(_props2, ['messages', 'for', 'component', 'children']);
+	    var props = _objectWithoutProperties(_props, ['messages', 'for', 'component', 'children']);
 	
 	    var activeMessages = this.state.messages;
 	
@@ -21479,16 +21480,17 @@
 	    );
 	  };
 	
-	  Message.prototype.resolveNames = function resolveNames() {
-	    var props = arguments.length <= 0 || arguments[0] === undefined ? this.props : arguments[0];
-	    var context = arguments.length <= 1 || arguments[1] === undefined ? this.context : arguments[1];
+	  Message.prototype.resolveNames = function resolveNames(props, context) {
 	    var messageContainer = context.messageContainer;
 	    var forNames = props['for'];
 	    var group = props.group;
 	
 	
-	    if (!forNames && group && messageContainer) forNames = messageContainer.namesForGroup(group);
+	    if (!forNames) {
+	      if (!group || !messageContainer) return null;
 	
+	      forNames = messageContainer.namesForGroup(group);
+	    }
 	    return forNames ? [].concat(forNames) : [];
 	  };
 	
