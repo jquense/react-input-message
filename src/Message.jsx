@@ -38,11 +38,7 @@ class Message extends React.Component {
   static defaultProps = {
     messagesForNames,
     component: 'span',
-    children: (messages) => (
-      values(messages)
-        .reduce(flatten, [])
-        .join(', ')
-    )
+    children: messages => messages.join(', ')
   }
 
   static contextTypes = {
@@ -88,7 +84,10 @@ class Message extends React.Component {
 
     return (
       <Component {...props}>
-        {children(activeMessages)}
+        {children(
+          values(activeMessages)
+            .reduce(flatten, [])
+        )}
       </Component>
     )
   }
