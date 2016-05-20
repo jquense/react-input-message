@@ -28,9 +28,9 @@ function shallowEqual(objA, objB, eql = isEql) {
   var bHasOwnProperty = Object.prototype.hasOwnProperty.bind(objB);
 
   for (var i = 0; i < keysA.length; i++) {
-    if (!bHasOwnProperty(keysA[i]) || !eql(objA[keysA[i]], objB[keysA[i]]) ) {
-      return false;
-    }
+    var key = keysA[i];
+    if (!bHasOwnProperty(key)) return false;
+    if (!eql(objA[key], objB[key])) return false;
   }
 
   return true;

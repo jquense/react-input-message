@@ -3,11 +3,9 @@ import $ from 'teaspoon';
 
 let {
     MessageContainer
-  , MessageTrigger
   , Message } = require('../src');
 
 describe('Container', function(){
-  var validator;
 
   it('should pass messages', () => {
     var inst = $(

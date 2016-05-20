@@ -1,6 +1,4 @@
-'use strict';
-var React   = require('react')
-  , Promise = require('universal-promise');
+import Promise from 'universal-promise';
 
 class Validator {
 
@@ -55,4 +53,4 @@ class Validator {
   }
 }
 
-module.exports = Validator
+export default Validator

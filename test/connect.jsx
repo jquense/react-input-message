@@ -30,12 +30,12 @@ describe('Message', ()=>{
 
     var messages = inst.render().single(Message._Message)[0];
 
-    messages.props.messages.should.eql({ fieldA: 'hi', fieldB: 'good day' })
+    messages.state.messages.should.eql({ fieldA: 'hi', fieldB: 'good day' })
   })
 
   it('should allow group summaries', function(){
     var inst = $(
-      <MessageContainer messages={{ fieldA: 'hi', fieldB: 'good day' }} >
+      <MessageContainer messages={{ fieldA: ['foo', 'hi'], fieldB: 'good day' }} >
         <div>
           <MessageTrigger for='fieldA' group='test'>
             <input/>
@@ -46,6 +46,6 @@ describe('Message', ()=>{
 
     var messages = inst.render().single(Message._Message)[0];
 
-    messages.props.messages.should.eql({ fieldA: 'hi' })
+    messages.state.messages.should.eql({ fieldA: ['foo', 'hi'] })
   })
 })

@@ -73,7 +73,7 @@ __`messages`__: a hash of unique names (`for` prop values) and either a string, 
 
 #### `MessageTrigger`
 
-A MessageTrigger is a commponent that listens to its child for events and triggers a
+A MessageTrigger is a component that listens to its child for events and triggers a
 validation event in the containing `MessageContainer`. Generally this will be an input component.
 
 __props__
@@ -85,7 +85,7 @@ __`group`__: an arbitrary group name that allows inputs to be triggered together
 the `group` prop identifies the trigger as a member of that group. If the `for` prop is
 excluded then the `group` prop identifies which group to trigger validation for.
 
-__`inject`__: a function that is passed the child and `active` . returns an object of props to add to the child.
+__`inject`__: a function that is passed the child, `active` boolean. returns an object of props to add to the child.
 
 ```js
 function inject(child, isActive){
@@ -112,12 +112,11 @@ but you can easily create custom Message components with the `connectToMessageCo
 
 #### `connectToMessageContainer(componentClass)`
 
-in lieu of mixins you can use this helper function to wrap a component so that it passed the MessageContainer
-state as props. The following will be passed to your `componentClass` as props:
+Higher order component that wraps the passed in `componentClass` and injects
+container statue as props:
 
-__`messages`__: will be for the specified field (via the `for` prop)
+__`messages`__: the container messages.
 
-__`active`__: if you provide a `for` prop this prop will be true or false based on whether there are any active messages.
 
 #### `Validator(validationFn)`
 

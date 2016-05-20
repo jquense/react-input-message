@@ -1,19 +1,22 @@
-'use strict';
-var React = require('react')
-  , Bridge = require('topeka/ChildBridge')
-  , connectToMessageContainer = require('./connectToMessageContainer');
+import React, { PropTypes } from 'react';
+import Bridge from 'topeka/ChildBridge';
+import connectToMessageContainer from './connectToMessageContainer';
 
-var stringOrArrayOfStrings = React.PropTypes.oneOfType([
-      React.PropTypes.string,
-      React.PropTypes.arrayOf(React.PropTypes.string)
-    ])
+let stringOrArrayOfStrings = PropTypes.oneOfType([
+  PropTypes.string,
+  PropTypes.arrayOf(PropTypes.string)
+]);
 
+function isActive(names, messages) {
+  return names.some(name => !!messages[name])
+}
 
 class MessageTrigger extends React.Component{
 
   static propTypes = {
     events: stringOrArrayOfStrings,
     inject: React.PropTypes.func,
+    isActive: React.PropTypes.func.isRequired,
 
     for:   stringOrArrayOfStrings,
     group: stringOrArrayOfStrings
@@ -24,75 +27,104 @@ class MessageTrigger extends React.Component{
   }
 
   static defaultProps = {
+    isActive,
     events: 'onChange',
   }
 
-  constructor(){
-    super()
-    this._inject = this._inject.bind(this);
-    this._notify = this._notify.bind(this);
+  constructor(...args) {
+    super(...args)
+    this.state = { isActive: false }
   }
 
-  componentWillMount(){
-    if (!this.context.messageContainer || !this.props.for || !this.props.for.length)
-      return
+  componentWillMount() {
+    let { isActive, messages, ...props } = this.props;
 
-    this._removeFromGroup = this.context.messageContainer.addToGroup(
-        this.props.group
-      , this.props.for
-    )
+    this.addToGroup();
+    this.setState({
+      isActive: isActive(
+          this.resolveNames()
+        , messages
+        , ...props
+      )
+    })
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
-    this._removeFromGroup &&
-      this._removeFromGroup()
+    let { isActive, messages, ...props } = nextProps;
 
-    if (!nextContext.messageContainer || !nextProps.for || !nextProps.for.length)
-      return
-
-    this._removeFromGroup = this.context.messageContainer.addToGroup(
-        nextProps.group
-      , nextProps.for
-    )
+    this.addToGroup(nextProps, nextContext);
+    this.setState({
+      isActive: isActive(
+          this.resolveNames(nextProps, nextContext)
+        , messages
+        , props
+      )
+    })
   }
 
   componentWillUnmount() {
-    this._removeFromGroup &&
-      this._removeFromGroup()
+    this.removeFromGroup &&
+      this.removeFromGroup()
   }
 
   render() {
     return (
       <Bridge
-        inject={this._inject}
+        inject={this.inject}
         events={this.props.events}
-        onEvent={this._notify}
+        onEvent={this.onEvent}
       >
         {this.props.children}
       </Bridge>
     )
   }
 
-  _inject(child) {
-    var active = this.props.for && this.props.active;
+  onEvent = (event, handler, ...args) => {
+    let { messageContainer } = this.context;
 
-    if (this.props.inject)
-      return this.props.inject(child, !!active)
+    handler && handler.apply(this, args)
+
+    if (!messageContainer) return
+
+    messageContainer.onValidate(
+        this.resolveNames()
+      , event
+      , args
+    );
   }
 
-  _notify(event, handler, ...args){
-    var container = this.context.messageContainer
-      , forProps = this.props.for ? [].concat(this.props.for) : [];
+  inject = (child) => {
+    let { messages, inject, isActive } = this.props;
 
-    handler
-      && handler.apply(this, args)
+    if (!inject) return false
+    let names = this.resolveNames();
 
-    if (!container) return
-    if (forProps.length)
-      container.onValidateFields(forProps, event, args)
-    else
-      container.onValidateGroup(this.props.group, event, args)
+    return inject(child, isActive(names, messages))
+  }
+
+  addToGroup(props = this.props, context = this.context){
+    let { messageContainer } = context;
+    let { 'for': forNames, group } = props;
+
+    this.removeFromGroup &&
+      this.removeFromGroup()
+
+    if (!messageContainer || !group || !forNames)
+      return
+
+    this.removeFromGroup =
+      messageContainer.addToGroup(group, forNames)
+  }
+
+  resolveNames(props = this.props, context = this.context) {
+    let { messageContainer } = context;
+    let { 'for': forNames, group } = props;
+
+    if (!forNames && group && messageContainer)
+      forNames = messageContainer.namesForGroup(group);
+
+    return forNames ? [].concat(forNames) : [];
   }
 }
 
-module.exports = connectToMessageContainer(MessageTrigger)
+export default connectToMessageContainer(MessageTrigger)
