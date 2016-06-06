@@ -20938,6 +20938,8 @@
 	  });
 	};
 	
+	var ALL_FIELDS = '@all';
+	
 	var MessageContainer = function (_React$Component) {
 	  _inherits(MessageContainer, _React$Component);
 	
@@ -21009,15 +21011,22 @@
 	  var _this2 = this;
 	
 	  this.namesForGroup = function (groups) {
-	    groups = groups || Object.keys(_this2._groups);
-	    groups = [].concat(groups);
+	    groups = groups ? [].concat(groups) : [];
+	
+	    if (groups.indexOf(ALL_FIELDS) !== -1) {
+	      groups = Object.keys(_this2._groups);
+	    }
+	
 	    return uniq(groups.reduce(function (fields, group) {
 	      return fields.concat(_this2._groups[group]);
 	    }, []));
 	  };
 	
 	  this.addToGroup = function (grpName, names) {
+	    if (grpName === ALL_FIELDS) return;
+	
 	    grpName = grpName || '@@unassigned-group';
+	
 	    names = names && [].concat(names);
 	
 	    var group = _this2._groups[grpName];
@@ -21081,8 +21090,6 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -21090,12 +21097,6 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var stringOrArrayOfStrings = _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.arrayOf(_react.PropTypes.string)]);
-	
-	function isActive(names, messages) {
-	  return names.some(function (name) {
-	    return !!messages[name];
-	  });
-	}
 	
 	var MessageTrigger = function (_React$Component) {
 	  _inherits(MessageTrigger, _React$Component);
@@ -21116,28 +21117,11 @@
 	  }
 	
 	  MessageTrigger.prototype.componentWillMount = function componentWillMount() {
-	    var _props = this.props;
-	    var isActive = _props.isActive;
-	    var messages = _props.messages;
-	
-	    var props = _objectWithoutProperties(_props, ['isActive', 'messages']);
-	
 	    this.addToGroup();
-	    this.setState({
-	      isActive: isActive.apply(undefined, [this.resolveNames(), messages].concat(props))
-	    });
 	  };
 	
 	  MessageTrigger.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps, nextContext) {
-	    var isActive = nextProps.isActive;
-	    var messages = nextProps.messages;
-	
-	    var props = _objectWithoutProperties(nextProps, ['isActive', 'messages']);
-	
 	    this.addToGroup(nextProps, nextContext);
-	    this.setState({
-	      isActive: isActive(this.resolveNames(nextProps, nextContext), messages, props)
-	    });
 	  };
 	
 	  MessageTrigger.prototype.componentWillUnmount = function componentWillUnmount() {
@@ -21178,7 +21162,6 @@
 	    var forNames = props['for'];
 	    var group = props.group;
 	
-	    // falsy groups will return all form fields
 	
 	    if (!forNames && messageContainer) forNames = messageContainer.namesForGroup(group);
 	
@@ -21191,16 +21174,21 @@
 	MessageTrigger.propTypes = {
 	  events: stringOrArrayOfStrings,
 	  inject: _react2.default.PropTypes.func,
-	  isActive: _react2.default.PropTypes.func.isRequired,
 	
 	  for: stringOrArrayOfStrings,
-	  group: stringOrArrayOfStrings
+	
+	  group: function group(props, name, compName) {
+	    if (!props[name] && (!props.for || !props.for.length)) {
+	      return new Error('A `group` prop is required when no `for` prop is provided' + ('for component ' + compName));
+	    }
+	
+	    return stringOrArrayOfStrings(props, name, compName);
+	  }
 	};
 	MessageTrigger.contextTypes = {
 	  messageContainer: _react2.default.PropTypes.object
 	};
 	MessageTrigger.defaultProps = {
-	  isActive: isActive,
 	  events: 'onChange'
 	};
 	
@@ -21223,16 +21211,14 @@
 	  };
 	
 	  this.inject = function (child) {
-	    var _props2 = _this2.props;
-	    var messages = _props2.messages;
-	    var inject = _props2.inject;
-	    var isActive = _props2.isActive;
+	    var _props = _this2.props;
+	    var messages = _props.messages;
+	    var inject = _props.inject;
 	
 	
 	    if (!inject) return false;
-	    var names = _this2.resolveNames();
 	
-	    return inject(child, isActive(names, messages));
+	    return inject(child, messages);
 	  };
 	};
 	
@@ -21343,9 +21329,33 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	function resolveNames(container, props) {
+	  var group = props.group;
+	  var forNames = props['for'];
+	
+	
+	  if (!forNames && container) forNames = container.namesForGroup(group);
+	
+	  return forNames ? [].concat(forNames) : [];
+	}
+	
+	function defaultMapMessages(messages, props, container) {
+	  var names = resolveNames(container, props);
+	  if (!names.length) return messages;
+	
+	  var messagesForNames = {};
+	
+	  names.forEach(function (name) {
+	    if (messages[name]) messagesForNames[name] = messages[name];
+	  });
+	
+	  return messagesForNames;
+	}
+	
 	exports.default = function (Component) {
 	  var _class, _temp;
 	
+	  var mapMessages = arguments.length <= 1 || arguments[1] === undefined ? defaultMapMessages : arguments[1];
 	  return _temp = _class = function (_React$Component) {
 	    _inherits(MessageListener, _React$Component);
 	
@@ -21362,7 +21372,18 @@
 	
 	      if (container) {
 	        this.unsubscribe = container.subscribe(function (messages) {
+	          if (mapMessages) messages = mapMessages(messages, _this2.props, container);
+	
 	          _this2.setState({ messages: messages });
+	        });
+	      }
+	    };
+	
+	    MessageListener.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps, nextContext) {
+	      if (mapMessages && mapMessages.length >= 2) {
+	        var container = nextContext.messageContainer;
+	        this.setState({
+	          messages: mapMessages(this.state.messages, nextProps, container)
 	        });
 	      }
 	    };
@@ -21416,16 +21437,6 @@
 	  return arr.concat(next);
 	};
 	
-	function messagesForNames(names, messages) {
-	  var messagesForNames = {};
-	
-	  names.forEach(function (name) {
-	    if (messages[name]) messagesForNames[name] = messages[name];
-	  });
-	
-	  return messagesForNames;
-	}
-	
 	var stringOrArrayOfStrings = _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.arrayOf(_react.PropTypes.string)]);
 	
 	var Message = function (_React$Component) {
@@ -21437,61 +21448,24 @@
 	    return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
 	  }
 	
-	  Message.prototype.componentWillMount = function componentWillMount() {
-	    this.setState(this.getMessageState(this.props, this.context));
-	  };
-	
-	  Message.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps, nextContext) {
-	    this.setState(this.getMessageState(nextProps, nextContext));
-	  };
-	
-	  Message.prototype.getMessageState = function getMessageState(props, context) {
-	    var messagesForNames = props.messagesForNames;
-	    var messages = props.messages;
-	
-	    var args = _objectWithoutProperties(props, ['messagesForNames', 'messages']);
-	
-	    var names = this.resolveNames(props, context);
-	
-	    messages = names == null ? messages : messagesForNames(names, messages, args);
-	
-	    return { messages: messages };
-	  };
-	
 	  Message.prototype.render = function render() {
 	    var _props = this.props;
-	    var
-	    /* eslint-disable no-unused-vars */
-	    messages = _props.messages;
 	    var fieldFor = _props.for;
+	    var
+	    /* eslint-enable no-unused-vars */
+	    messages = _props.messages;
 	    var Component = _props.component;
 	    var children = _props.children;
 	
-	    var props = _objectWithoutProperties(_props, ['messages', 'for', 'component', 'children']);
+	    var props = _objectWithoutProperties(_props, ['for', 'messages', 'component', 'children']);
 	
-	    var activeMessages = this.state.messages;
-	
-	    if (!Object.keys(activeMessages || {}).length) return null;
+	    if (!Object.keys(messages || {}).length) return null;
 	
 	    return _react2.default.createElement(
 	      Component,
 	      props,
-	      children(values(activeMessages).reduce(flatten, []))
+	      children(values(messages).reduce(flatten, []))
 	    );
-	  };
-	
-	  Message.prototype.resolveNames = function resolveNames(props, context) {
-	    var messageContainer = context.messageContainer;
-	    var forNames = props['for'];
-	    var group = props.group;
-	
-	
-	    if (!forNames) {
-	      if (!group || !messageContainer) return null;
-	
-	      forNames = messageContainer.namesForGroup(group);
-	    }
-	    return forNames ? [].concat(forNames) : [];
 	  };
 	
 	  return Message;
@@ -21505,7 +21479,6 @@
 	  component: _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.func])
 	};
 	Message.defaultProps = {
-	  messagesForNames: messagesForNames,
 	  component: 'span',
 	  children: function children(messages) {
 	    return messages.join(', ');
