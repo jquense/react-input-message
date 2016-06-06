@@ -6,6 +6,8 @@ let add = (array, item) => array.indexOf(item) === -1 && array.push(item)
 
 let remove = (array, item) => array.filter(i => i !== item)
 
+const ALL_FIELDS = '@all';
+
 export default class MessageContainer extends React.Component {
 
   static propTypes = {
@@ -45,16 +47,23 @@ export default class MessageContainer extends React.Component {
     return this._context
   }
 
-  namesForGroup = groups => {
-    groups = groups || Object.keys(this._groups)
-    groups = [].concat(groups)
+  namesForGroup = (groups) => {
+    groups = groups ? [].concat(groups) : [];
+
+    if (groups.indexOf(ALL_FIELDS) !== -1) {
+      groups = Object.keys(this._groups);
+    }
+
     return uniq(groups.reduce(
       (fields, group) => fields.concat(this._groups[group]), [])
     )
   };
 
   addToGroup = (grpName, names) => {
+    if (grpName === ALL_FIELDS) return
+
     grpName = grpName || '@@unassigned-group';
+
     names = names && [].concat(names)
 
     let group = this._groups[grpName]

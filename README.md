@@ -83,7 +83,8 @@ is being triggered _for_. `for` values should map to possible `messages` keys
 
 __`group`__: an arbitrary group name that allows inputs to be triggered together. If a `for` prop is specified then
 the `group` prop identifies the trigger as a member of that group. If the `for` prop is
-excluded then the `group` prop identifies which group to trigger validation for.
+excluded then the `group` prop identifies which group to trigger validation for, use the special value `'@all'`
+to trigger validation for every known name.
 
 __`inject`__: a function that is passed the child, `active` boolean. returns an object of props to add to the child.
 
@@ -110,7 +111,7 @@ group (or the entire container), but will not be the subject of a validation its
 Displays the actual messages for a field, the default implementation just concats the messages together with `, `
 but you can easily create custom Message components with the `connectToMessageContainer()` helper
 
-#### `connectToMessageContainer(componentClass)`
+#### `connectToMessageContainer(componentClass, mapMessages: (messages, props, container) -> object)`
 
 Higher order component that wraps the passed in `componentClass` and injects
 container statue as props:

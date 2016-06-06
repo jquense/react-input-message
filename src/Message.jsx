@@ -4,17 +4,6 @@ import connectToMessageContainer from './connectToMessageContainer';
 let values = obj => Object.keys(obj).map( k => obj[k] )
 let flatten = (arr, next) => arr.concat(next)
 
-function messagesForNames(names, messages) {
-  let messagesForNames = {};
-
-  names.forEach(name => {
-    if (messages[name])
-      messagesForNames[name] = messages[name]
-  })
-
-  return messagesForNames;
-}
-
 
 let stringOrArrayOfStrings = PropTypes.oneOfType([
   PropTypes.string,
@@ -34,7 +23,6 @@ class Message extends React.Component {
   }
 
   static defaultProps = {
-    messagesForNames,
     component: 'span',
     children: messages => messages.join(', ')
   }
@@ -43,71 +31,28 @@ class Message extends React.Component {
     messageContainer: React.PropTypes.object,
   }
 
-  componentWillMount() {
-    this.setState(
-      this.getMessageState(
-        this.props,
-        this.context
-      ))
-  }
-
-  componentWillReceiveProps(nextProps, nextContext) {
-    this.setState(
-      this.getMessageState(
-        nextProps,
-        nextContext
-      ))
-  }
-
-  getMessageState(props, context) {
-    let { messagesForNames, messages, ...args } = props;
-    let names = this.resolveNames(props, context);
-
-    messages = names == null ? messages : messagesForNames(
-        names
-      , messages
-      , args
-    )
-
-    return { messages }
-  }
-
   render() {
     let {
       /* eslint-disable no-unused-vars */
-        messages, for: fieldFor
+        for: fieldFor
       /* eslint-enable no-unused-vars */
-
+      , messages
       , component: Component
       , children
       , ...props } = this.props;
 
-    let activeMessages = this.state.messages;
 
-    if (!Object.keys(activeMessages || {}).length)
+    if (!Object.keys(messages || {}).length)
       return null
 
     return (
       <Component {...props}>
         {children(
-          values(activeMessages)
+          values(messages)
             .reduce(flatten, [])
         )}
       </Component>
     )
-  }
-
-  resolveNames(props, context) {
-    let { messageContainer } = context;
-    let { 'for': forNames, group } = props;
-
-    if (!forNames) {
-      if (!group || !messageContainer)
-        return null
-
-      forNames = messageContainer.namesForGroup(group);
-    }
-    return forNames ? [].concat(forNames) : [];
   }
 }
 

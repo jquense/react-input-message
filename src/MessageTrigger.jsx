@@ -7,19 +7,25 @@ let stringOrArrayOfStrings = PropTypes.oneOfType([
   PropTypes.arrayOf(PropTypes.string)
 ]);
 
-function isActive(names, messages) {
-  return names.some(name => !!messages[name])
-}
 
 class MessageTrigger extends React.Component{
 
   static propTypes = {
     events: stringOrArrayOfStrings,
     inject: React.PropTypes.func,
-    isActive: React.PropTypes.func.isRequired,
 
-    for:   stringOrArrayOfStrings,
-    group: stringOrArrayOfStrings
+    for: stringOrArrayOfStrings,
+
+    group: (props, name, compName) => {
+      if (!props[name] && (!props.for || !props.for.length)) {
+        return new Error(
+          'A `group` prop is required when no `for` prop is provided' +
+          `for component ${compName}`
+        )
+      }
+
+      return stringOrArrayOfStrings(props, name, compName);
+    }
   }
 
   static contextTypes = {
@@ -27,7 +33,6 @@ class MessageTrigger extends React.Component{
   }
 
   static defaultProps = {
-    isActive,
     events: 'onChange',
   }
 
@@ -37,29 +42,11 @@ class MessageTrigger extends React.Component{
   }
 
   componentWillMount() {
-    let { isActive, messages, ...props } = this.props;
-
     this.addToGroup();
-    this.setState({
-      isActive: isActive(
-          this.resolveNames()
-        , messages
-        , ...props
-      )
-    })
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
-    let { isActive, messages, ...props } = nextProps;
-
     this.addToGroup(nextProps, nextContext);
-    this.setState({
-      isActive: isActive(
-          this.resolveNames(nextProps, nextContext)
-        , messages
-        , props
-      )
-    })
   }
 
   componentWillUnmount() {
@@ -94,12 +81,14 @@ class MessageTrigger extends React.Component{
   }
 
   inject = (child) => {
-    let { messages, inject, isActive } = this.props;
+    let { messages, inject } = this.props;
 
     if (!inject) return false
-    let names = this.resolveNames();
 
-    return inject(child, isActive(names, messages))
+    return inject(
+      child,
+      messages
+    )
   }
 
   addToGroup(props = this.props, context = this.context){
@@ -120,7 +109,6 @@ class MessageTrigger extends React.Component{
     let { messageContainer } = context;
     let { 'for': forNames, group } = props;
 
-    // falsy groups will return all form fields
     if (!forNames && messageContainer)
       forNames = messageContainer.namesForGroup(group);
 

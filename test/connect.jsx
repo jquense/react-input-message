@@ -30,7 +30,7 @@ describe('Message', ()=>{
 
     var messages = inst.render().single(Message._Message)[0];
 
-    messages.state.messages.should.eql({ fieldA: 'hi', fieldB: 'good day' })
+    messages.props.messages.should.eql({ fieldA: 'hi', fieldB: 'good day' })
   })
 
   it('should allow group summaries', function(){
@@ -46,6 +46,6 @@ describe('Message', ()=>{
 
     var messages = inst.render().single(Message._Message)[0];
 
-    messages.state.messages.should.eql({ fieldA: ['foo', 'hi'] })
+    messages.props.messages.should.eql({ fieldA: ['foo', 'hi'] })
   })
 })

@@ -87,7 +87,7 @@ describe('Trigger', ()=>{
             <input />
           </MessageTrigger>
 
-          <MessageTrigger events='onClick'>
+          <MessageTrigger events='onClick' group='@all'>
             <button />
           </MessageTrigger>
         </div>
