@@ -21329,7 +21329,7 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	function resolveNames(container, props) {
+	function defaultResolveNames(props, container) {
 	  var group = props.group;
 	  var forNames = props['for'];
 	
@@ -21339,12 +21339,10 @@
 	  return forNames ? [].concat(forNames) : [];
 	}
 	
-	function defaultMapMessages(messages, props, container) {
-	  var names = resolveNames(container, props);
+	function defaultMapMessages(messages, names) {
 	  if (!names.length) return messages;
 	
 	  var messagesForNames = {};
-	
 	  names.forEach(function (name) {
 	    if (messages[name]) messagesForNames[name] = messages[name];
 	  });
@@ -21352,10 +21350,18 @@
 	  return messagesForNames;
 	}
 	
+	function mapMessages(messages, resolveNames, props, container) {
+	  var names = resolveNames ? resolveNames(props, container) : [];
+	  var mapMessages = props.mapMessages;
+	
+	
+	  return (mapMessages || defaultMapMessages)(messages, names, props, container);
+	}
+	
 	exports.default = function (Component) {
 	  var _class, _temp;
 	
-	  var mapMessages = arguments.length <= 1 || arguments[1] === undefined ? defaultMapMessages : arguments[1];
+	  var resolveNames = arguments.length <= 1 || arguments[1] === undefined ? defaultResolveNames : arguments[1];
 	  return _temp = _class = function (_React$Component) {
 	    _inherits(MessageListener, _React$Component);
 	
@@ -21372,7 +21378,7 @@
 	
 	      if (container) {
 	        this.unsubscribe = container.subscribe(function (messages) {
-	          if (mapMessages) messages = mapMessages(messages, _this2.props, container);
+	          messages = mapMessages(messages, resolveNames, _this2.props, container);
 	
 	          _this2.setState({ messages: messages });
 	        });
@@ -21397,7 +21403,9 @@
 	    };
 	
 	    return MessageListener;
-	  }(_react2.default.Component), _class.DecoratedComponent = Component, _class.contextTypes = {
+	  }(_react2.default.Component), _class.DecoratedComponent = Component, _class.propTypes = {
+	    mapMessages: _react2.default.PropTypes.func
+	  }, _class.contextTypes = {
 	    messageContainer: _react2.default.PropTypes.object
 	  }, _temp;
 	};
