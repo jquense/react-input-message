@@ -58,7 +58,12 @@ export default (Component, resolveNames = defaultResolveNames) =>
       if (mapMessages && mapMessages.length >= 2) {
         let container = nextContext.messageContainer;
         this.setState({
-          messages: mapMessages(this.state.messages, nextProps, container)
+          messages: mapMessages(
+            this.state.messages,
+            resolveNames,
+            nextProps,
+            container
+          ),
         })
       }
     }
