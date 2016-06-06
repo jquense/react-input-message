@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-function resolveNames(container, props) {
+function defaultResolveNames(props, container) {
   let { group, 'for': forNames } = props;
 
   if (!forNames && container)
@@ -10,25 +10,33 @@ function resolveNames(container, props) {
   return forNames ? [].concat(forNames) : [];
 }
 
-function defaultMapMessages(messages, props, container) {
-  let names = resolveNames(container, props);
+function defaultMapMessages(messages, names) {
   if (!names.length) return messages;
 
   let messagesForNames = {};
-
   names.forEach(name => {
     if (messages[name])
       messagesForNames[name] = messages[name]
   })
 
-  return messagesForNames;
+  return messagesForNames
 }
 
+function mapMessages(messages, resolveNames, props, container) {
+  let names = resolveNames ? resolveNames(props, container) : [];
+  let { mapMessages } = props;
 
-export default (Component, mapMessages = defaultMapMessages) =>
+  return (mapMessages || defaultMapMessages)(messages, names, props, container)
+}
+
+export default (Component, resolveNames = defaultResolveNames) =>
   class MessageListener extends React.Component {
 
     static DecoratedComponent = Component
+
+    static propTypes = {
+      mapMessages: React.PropTypes.func,
+    }
 
     static contextTypes = {
       messageContainer: React.PropTypes.object,
@@ -39,8 +47,7 @@ export default (Component, mapMessages = defaultMapMessages) =>
 
       if (container) {
         this.unsubscribe = container.subscribe(messages => {
-          if (mapMessages)
-            messages = mapMessages(messages, this.props, container)
+          messages = mapMessages(messages, resolveNames, this.props, container)
 
           this.setState({ messages })
         })
