@@ -21377,20 +21377,29 @@
 	      var container = this.context.messageContainer;
 	
 	      if (container) {
-	        this.unsubscribe = container.subscribe(function (messages) {
-	          messages = mapMessages(messages, resolveNames, _this2.props, container);
+	        this.unsubscribe = container.subscribe(function (allMessages) {
+	          var messages = mapMessages(allMessages, resolveNames, _this2.props, _this2.context.messageContainer);
 	
-	          _this2.setState({ messages: messages });
+	          _this2.setState({ messages: messages, allMessages: allMessages });
 	        });
 	      }
 	    };
 	
 	    MessageListener.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps, nextContext) {
+	      var _this3 = this;
+	
 	      if (mapMessages && mapMessages.length >= 2) {
-	        var container = nextContext.messageContainer;
-	        this.setState({
-	          messages: mapMessages(this.state.messages, resolveNames, nextProps, container)
-	        });
+	        (function () {
+	          var container = nextContext.messageContainer;
+	          // callback style because the listener may have been called before
+	          // and not had a chance to flush it's changes yet
+	          _this3.setState(function (_ref) {
+	            var allMessages = _ref.allMessages;
+	            return {
+	              messages: mapMessages(allMessages, resolveNames, nextProps, container)
+	            };
+	          });
+	        })();
 	      }
 	    };
 	
@@ -21399,7 +21408,10 @@
 	    };
 	
 	    MessageListener.prototype.render = function render() {
-	      return _react2.default.createElement(Component, _extends({}, this.props, this.state));
+	      var messages = this.state.messages;
+	
+	
+	      return _react2.default.createElement(Component, _extends({}, this.props, { messages: messages }));
 	    };
 	
 	    return MessageListener;
