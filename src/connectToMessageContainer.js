@@ -46,10 +46,15 @@ export default (Component, resolveNames = defaultResolveNames) =>
       let container = this.context.messageContainer;
 
       if (container) {
-        this.unsubscribe = container.subscribe(messages => {
-          messages = mapMessages(messages, resolveNames, this.props, container)
+        this.unsubscribe = container.subscribe(allMessages => {
+          let messages = mapMessages(
+            allMessages,
+            resolveNames,
+            this.props,
+            this.context.messageContainer
+          )
 
-          this.setState({ messages })
+          this.setState({ messages, allMessages })
         })
       }
     }
@@ -57,14 +62,16 @@ export default (Component, resolveNames = defaultResolveNames) =>
     componentWillReceiveProps(nextProps, nextContext) {
       if (mapMessages && mapMessages.length >= 2) {
         let container = nextContext.messageContainer;
-        this.setState({
+        // callback style because the listener may have been called before
+        // and not had a chance to flush it's changes yet
+        this.setState(({ allMessages }) => ({
           messages: mapMessages(
-            this.state.messages,
+            allMessages,
             resolveNames,
             nextProps,
             container
           ),
-        })
+        }))
       }
     }
 
@@ -72,7 +79,9 @@ export default (Component, resolveNames = defaultResolveNames) =>
       this.unsubscribe && this.unsubscribe()
     }
 
-    render(){
-      return <Component {...this.props} {...this.state}/>
+    render() {
+      let { messages } = this.state;
+
+      return <Component {...this.props} messages={messages} />
     }
   }
