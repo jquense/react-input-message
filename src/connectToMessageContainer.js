@@ -1,5 +1,13 @@
 import React from 'react';
 
+function isReactComponent(component) {
+  return !!(
+    component &&
+    component.prototype &&
+    component.prototype.isReactComponent
+  );
+}
+
 
 function defaultResolveNames(props, container) {
   let { group, 'for': forNames } = props;
@@ -22,14 +30,24 @@ function defaultMapMessages(messages, names) {
   return messagesForNames
 }
 
-function mapMessages(messages, resolveNames, props, container) {
-  let names = resolveNames ? resolveNames(props, container) : [];
-  let { mapMessages } = props;
 
-  return (mapMessages || defaultMapMessages)(messages, names, props, container)
-}
+export default (Component, {
+  methods = [],
+  mapMessages = defaultMapMessages,
+  resolveNames = defaultResolveNames,
+} = {}) => {
 
-export default (Component, resolveNames = defaultResolveNames) =>
+  function resolveNamesAndMapMessages(messages, props, container) {
+    let names = resolveNames ? resolveNames(props, container) : [];
+
+    return (props.mapMessages || mapMessages)(
+      messages,
+      names,
+      props,
+      container
+    )
+  }
+
   class MessageListener extends React.Component {
 
     static DecoratedComponent = Component
@@ -47,9 +65,8 @@ export default (Component, resolveNames = defaultResolveNames) =>
 
       if (container) {
         this.unsubscribe = container.subscribe(allMessages => {
-          let messages = mapMessages(
+          let messages = resolveNamesAndMapMessages(
             allMessages,
-            resolveNames,
             this.props,
             this.context.messageContainer
           )
@@ -65,9 +82,8 @@ export default (Component, resolveNames = defaultResolveNames) =>
         // callback style because the listener may have been called before
         // and not had a chance to flush it's changes yet
         this.setState(({ allMessages }) => ({
-          messages: mapMessages(
+          messages: resolveNamesAndMapMessages(
             allMessages,
-            resolveNames,
             nextProps,
             container
           ),
@@ -80,8 +96,23 @@ export default (Component, resolveNames = defaultResolveNames) =>
     }
 
     render() {
-      let { messages } = this.state;
-
-      return <Component {...this.props} messages={messages} />
+      let { messages } = this.state || {};
+      
+      return (
+        <Component
+          messages={messages}
+          ref={isReactComponent(Component) ? 'inner' : undefined}
+          {...this.props}
+        />
+      )
     }
   }
+
+  methods.forEach(method => {
+    MessageListener.prototype[method] = function(...args) {
+      return this.refs.inner[method](...args)
+    }
+  })
+
+  return MessageListener;
+}

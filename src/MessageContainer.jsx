@@ -1,4 +1,5 @@
 import React from 'react';
+import connectToMessageContainer from './connectToMessageContainer';
 
 let uniq = array => array.filter((item, idx) => array.indexOf(item) === idx);
 
@@ -8,15 +9,22 @@ let remove = (array, item) => array.filter(i => i !== item)
 
 const ALL_FIELDS = '@all';
 
-export default class MessageContainer extends React.Component {
+class MessageContainer extends React.Component {
 
   static propTypes = {
-    messages:           React.PropTypes.object,
+    passthrough: React.PropTypes.bool,
+    mapNames: React.PropTypes.func,
+    messages: React.PropTypes.object,
     onValidationNeeded: React.PropTypes.func
   }
 
   static defaultProps = {
-    messages: Object.create(null)
+    messages: Object.create(null),
+    mapNames: names => names,
+  }
+
+  static contextTypes = {
+    messageContainer: React.PropTypes.object,
   }
 
   static childContextTypes = {
@@ -82,6 +90,17 @@ export default class MessageContainer extends React.Component {
   onValidate = (fields, type, args) => {
     if (!fields || !fields.length) return
 
+    let { mapNames, passthrough } = this.props;
+    let { messageContainer } = this.context;
+
+    if (messageContainer && passthrough) {
+      messageContainer.onValidate(
+        mapNames(fields),
+        type,
+        args
+      )
+    }
+
     this.props.onValidationNeeded &&
       this.props.onValidationNeeded({ type, fields, args })
   };
@@ -109,3 +128,12 @@ export default class MessageContainer extends React.Component {
     return this.props.children
   }
 }
+
+export default connectToMessageContainer(MessageContainer, {
+  resolveNames: () => {},
+  mapMessages: messages => messages,
+  methods: [
+    'namesForGroup',
+    'addToGroup'
+  ]
+})
