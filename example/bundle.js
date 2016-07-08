@@ -58,9 +58,9 @@
 	var Promise = __webpack_require__(158);
 	var Validator = __webpack_require__(161);
 	var MessageContainer = __webpack_require__(166);
-	var MessageTrigger = __webpack_require__(167);
+	var MessageTrigger = __webpack_require__(168);
 	var Message = __webpack_require__(170);
-	var connectToMessageContainer = __webpack_require__(169);
+	var connectToMessageContainer = __webpack_require__(167);
 	var RW = __webpack_require__(171);
 	var cn = __webpack_require__(194);
 	
@@ -20914,6 +20914,10 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
+	var _connectToMessageContainer = __webpack_require__(167);
+	
+	var _connectToMessageContainer2 = _interopRequireDefault(_connectToMessageContainer);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -20997,11 +21001,19 @@
 	}(_react2.default.Component);
 	
 	MessageContainer.propTypes = {
+	  passthrough: _react2.default.PropTypes.bool,
+	  mapNames: _react2.default.PropTypes.func,
 	  messages: _react2.default.PropTypes.object,
 	  onValidationNeeded: _react2.default.PropTypes.func
 	};
 	MessageContainer.defaultProps = {
-	  messages: Object.create(null)
+	  messages: Object.create(null),
+	  mapNames: function mapNames(names) {
+	    return names;
+	  }
+	};
+	MessageContainer.contextTypes = {
+	  messageContainer: _react2.default.PropTypes.object
 	};
 	MessageContainer.childContextTypes = {
 	  messageContainer: _react2.default.PropTypes.object
@@ -21049,6 +21061,16 @@
 	  this.onValidate = function (fields, type, args) {
 	    if (!fields || !fields.length) return;
 	
+	    var _props = _this2.props;
+	    var mapNames = _props.mapNames;
+	    var passthrough = _props.passthrough;
+	    var messageContainer = _this2.context.messageContainer;
+	
+	
+	    if (messageContainer && passthrough) {
+	      messageContainer.onValidate(mapNames(fields), type, args);
+	    }
+	
 	    _this2.props.onValidationNeeded && _this2.props.onValidationNeeded({ type: type, fields: fields, args: args });
 	  };
 	
@@ -21065,7 +21087,13 @@
 	  };
 	};
 	
-	exports.default = MessageContainer;
+	exports.default = (0, _connectToMessageContainer2.default)(MessageContainer, {
+	  resolveNames: function resolveNames() {},
+	  mapMessages: function mapMessages(messages) {
+	    return messages;
+	  },
+	  methods: ['namesForGroup', 'addToGroup']
+	});
 	module.exports = exports['default'];
 
 /***/ },
@@ -21076,15 +21104,167 @@
 	
 	exports.__esModule = true;
 	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
 	var _react = __webpack_require__(1);
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _ChildBridge = __webpack_require__(168);
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	function isReactComponent(component) {
+	  return !!(component && component.prototype && component.prototype.isReactComponent);
+	}
+	
+	function defaultResolveNames(props, container) {
+	  var group = props.group;
+	  var forNames = props['for'];
+	
+	
+	  if (!forNames && container) forNames = container.namesForGroup(group);
+	
+	  return forNames ? [].concat(forNames) : [];
+	}
+	
+	function defaultMapMessages(messages, names) {
+	  if (!names.length) return messages;
+	
+	  var messagesForNames = {};
+	  names.forEach(function (name) {
+	    if (messages[name]) messagesForNames[name] = messages[name];
+	  });
+	
+	  return messagesForNames;
+	}
+	
+	exports.default = function (Component) {
+	  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	  var _ref$methods = _ref.methods;
+	  var methods = _ref$methods === undefined ? [] : _ref$methods;
+	  var _ref$mapMessages = _ref.mapMessages;
+	  var mapMessages = _ref$mapMessages === undefined ? defaultMapMessages : _ref$mapMessages;
+	  var _ref$resolveNames = _ref.resolveNames;
+	  var resolveNames = _ref$resolveNames === undefined ? defaultResolveNames : _ref$resolveNames;
+	
+	
+	  function resolveNamesAndMapMessages(messages, props, container) {
+	    var names = resolveNames ? resolveNames(props, container) : [];
+	
+	    return (props.mapMessages || mapMessages)(messages, names, props, container);
+	  }
+	
+	  var MessageListener = function (_React$Component) {
+	    _inherits(MessageListener, _React$Component);
+	
+	    function MessageListener() {
+	      _classCallCheck(this, MessageListener);
+	
+	      return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
+	    }
+	
+	    MessageListener.prototype.componentWillUnmount = function componentWillUnmount() {
+	      this.unmounted = true;
+	    };
+	
+	    MessageListener.prototype.componentWillMount = function componentWillMount() {
+	      var _this2 = this;
+	
+	      var container = this.context.messageContainer;
+	
+	      if (container) {
+	        this.unsubscribe = container.subscribe(function (allMessages) {
+	          if (_this2.unmounted) return;
+	
+	          var messages = resolveNamesAndMapMessages(allMessages, _this2.props, _this2.context.messageContainer);
+	
+	          _this2.setState({ messages: messages, allMessages: allMessages });
+	        });
+	      }
+	    };
+	
+	    MessageListener.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps, nextContext) {
+	      var _this3 = this;
+	
+	      if (mapMessages && mapMessages.length >= 2) {
+	        (function () {
+	          var container = nextContext.messageContainer;
+	          // callback style because the listener may have been called before
+	          // and not had a chance to flush it's changes yet
+	          _this3.setState(function (_ref2) {
+	            var allMessages = _ref2.allMessages;
+	            return {
+	              messages: resolveNamesAndMapMessages(allMessages, nextProps, container)
+	            };
+	          });
+	        })();
+	      }
+	    };
+	
+	    MessageListener.prototype.componentWillUnmount = function componentWillUnmount() {
+	      this.unsubscribe && this.unsubscribe();
+	    };
+	
+	    MessageListener.prototype.render = function render() {
+	      var _ref3 = this.state || {};
+	
+	      var messages = _ref3.messages;
+	
+	
+	      return _react2.default.createElement(Component, _extends({
+	        messages: messages,
+	        ref: isReactComponent(Component) ? 'inner' : undefined
+	      }, this.props));
+	    };
+	
+	    return MessageListener;
+	  }(_react2.default.Component);
+	
+	  MessageListener.DecoratedComponent = Component;
+	  MessageListener.propTypes = {
+	    mapMessages: _react2.default.PropTypes.func
+	  };
+	  MessageListener.contextTypes = {
+	    messageContainer: _react2.default.PropTypes.object
+	  };
+	
+	
+	  methods.forEach(function (method) {
+	    MessageListener.prototype[method] = function () {
+	      var _refs$inner;
+	
+	      return (_refs$inner = this.refs.inner)[method].apply(_refs$inner, arguments);
+	    };
+	  });
+	
+	  return MessageListener;
+	};
+	
+	module.exports = exports['default'];
+
+/***/ },
+/* 168 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _ChildBridge = __webpack_require__(169);
 	
 	var _ChildBridge2 = _interopRequireDefault(_ChildBridge);
 	
-	var _connectToMessageContainer = __webpack_require__(169);
+	var _connectToMessageContainer = __webpack_require__(167);
 	
 	var _connectToMessageContainer2 = _interopRequireDefault(_connectToMessageContainer);
 	
@@ -21226,7 +21406,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 168 */
+/* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21308,123 +21488,6 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 169 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	exports.__esModule = true;
-	
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-	
-	var _react = __webpack_require__(1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	function defaultResolveNames(props, container) {
-	  var group = props.group;
-	  var forNames = props['for'];
-	
-	
-	  if (!forNames && container) forNames = container.namesForGroup(group);
-	
-	  return forNames ? [].concat(forNames) : [];
-	}
-	
-	function defaultMapMessages(messages, names) {
-	  if (!names.length) return messages;
-	
-	  var messagesForNames = {};
-	  names.forEach(function (name) {
-	    if (messages[name]) messagesForNames[name] = messages[name];
-	  });
-	
-	  return messagesForNames;
-	}
-	
-	function mapMessages(messages, resolveNames, props, container) {
-	  var names = resolveNames ? resolveNames(props, container) : [];
-	  var mapMessages = props.mapMessages;
-	
-	
-	  return (mapMessages || defaultMapMessages)(messages, names, props, container);
-	}
-	
-	exports.default = function (Component) {
-	  var _class, _temp;
-	
-	  var resolveNames = arguments.length <= 1 || arguments[1] === undefined ? defaultResolveNames : arguments[1];
-	  return _temp = _class = function (_React$Component) {
-	    _inherits(MessageListener, _React$Component);
-	
-	    function MessageListener() {
-	      _classCallCheck(this, MessageListener);
-	
-	      return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
-	    }
-	
-	    MessageListener.prototype.componentWillMount = function componentWillMount() {
-	      var _this2 = this;
-	
-	      var container = this.context.messageContainer;
-	
-	      if (container) {
-	        this.unsubscribe = container.subscribe(function (allMessages) {
-	          var messages = mapMessages(allMessages, resolveNames, _this2.props, _this2.context.messageContainer);
-	
-	          _this2.setState({ messages: messages, allMessages: allMessages });
-	        });
-	      }
-	    };
-	
-	    MessageListener.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps, nextContext) {
-	      var _this3 = this;
-	
-	      if (mapMessages && mapMessages.length >= 2) {
-	        (function () {
-	          var container = nextContext.messageContainer;
-	          // callback style because the listener may have been called before
-	          // and not had a chance to flush it's changes yet
-	          _this3.setState(function (_ref) {
-	            var allMessages = _ref.allMessages;
-	            return {
-	              messages: mapMessages(allMessages, resolveNames, nextProps, container)
-	            };
-	          });
-	        })();
-	      }
-	    };
-	
-	    MessageListener.prototype.componentWillUnmount = function componentWillUnmount() {
-	      this.unsubscribe && this.unsubscribe();
-	    };
-	
-	    MessageListener.prototype.render = function render() {
-	      var messages = this.state.messages;
-	
-	
-	      return _react2.default.createElement(Component, _extends({}, this.props, { messages: messages }));
-	    };
-	
-	    return MessageListener;
-	  }(_react2.default.Component), _class.DecoratedComponent = Component, _class.propTypes = {
-	    mapMessages: _react2.default.PropTypes.func
-	  }, _class.contextTypes = {
-	    messageContainer: _react2.default.PropTypes.object
-	  }, _temp;
-	};
-	
-	module.exports = exports['default'];
-
-/***/ },
 /* 170 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -21434,7 +21497,7 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _connectToMessageContainer = __webpack_require__(169);
+	var _connectToMessageContainer = __webpack_require__(167);
 	
 	var _connectToMessageContainer2 = _interopRequireDefault(_connectToMessageContainer);
 	
