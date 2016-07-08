@@ -60,11 +60,18 @@ export default (Component, {
       messageContainer: React.PropTypes.object,
     }
 
+    componentWillUnmount() {
+      this.unmounted = true;
+    }
+
     componentWillMount() {
       let container = this.context.messageContainer;
 
       if (container) {
         this.unsubscribe = container.subscribe(allMessages => {
+          if (this.unmounted)
+            return;
+
           let messages = resolveNamesAndMapMessages(
             allMessages,
             this.props,
@@ -97,7 +104,7 @@ export default (Component, {
 
     render() {
       let { messages } = this.state || {};
-      
+
       return (
         <Component
           messages={messages}
