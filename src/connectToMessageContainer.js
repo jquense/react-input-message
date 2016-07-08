@@ -60,10 +60,6 @@ export default (Component, {
       messageContainer: React.PropTypes.object,
     }
 
-    componentWillUnmount() {
-      this.unmounted = true;
-    }
-
     componentWillMount() {
       let container = this.context.messageContainer;
 
@@ -99,6 +95,7 @@ export default (Component, {
     }
 
     componentWillUnmount() {
+      this.unmounted = true;
       this.unsubscribe && this.unsubscribe()
     }
 
