@@ -102,11 +102,15 @@ export default (Component, {
     render() {
       let { messages } = this.state || {};
 
+      if (this.props.messages) {
+        messages = this.props.messages;
+      }
+
       return (
         <Component
+          {...this.props}
           messages={messages}
           ref={isReactComponent(Component) ? 'inner' : undefined}
-          {...this.props}
         />
       )
     }
