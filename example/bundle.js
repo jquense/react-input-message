@@ -21169,10 +21169,6 @@
 	      return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
 	    }
 	
-	    MessageListener.prototype.componentWillUnmount = function componentWillUnmount() {
-	      this.unmounted = true;
-	    };
-	
 	    MessageListener.prototype.componentWillMount = function componentWillMount() {
 	      var _this2 = this;
 	
@@ -21208,6 +21204,7 @@
 	    };
 	
 	    MessageListener.prototype.componentWillUnmount = function componentWillUnmount() {
+	      this.unmounted = true;
 	      this.unsubscribe && this.unsubscribe();
 	    };
 	
@@ -21217,10 +21214,14 @@
 	      var messages = _ref3.messages;
 	
 	
-	      return _react2.default.createElement(Component, _extends({
+	      if (this.props.messages) {
+	        messages = this.props.messages;
+	      }
+	
+	      return _react2.default.createElement(Component, _extends({}, this.props, {
 	        messages: messages,
 	        ref: isReactComponent(Component) ? 'inner' : undefined
-	      }, this.props));
+	      }));
 	    };
 	
 	    return MessageListener;
