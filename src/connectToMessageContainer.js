@@ -100,7 +100,7 @@ function connectToMessageContainer(Component, {
     }
 
     render() {
-      let { messages } = this.state || {};
+      let { messages = {} } = this.state || {};
 
       if (this.props.messages) {
         messages = this.props.messages;
