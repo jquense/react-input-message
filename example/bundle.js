@@ -21069,6 +21069,7 @@
 	
 	    if (messageContainer && passthrough) {
 	      messageContainer.onValidate(mapNames(fields), type, args);
+	      return;
 	    }
 	
 	    _this2.props.onValidationNeeded && _this2.props.onValidationNeeded({ type: type, fields: fields, args: args });
@@ -21143,7 +21144,7 @@
 	  return messagesForNames;
 	}
 	
-	exports.default = function (Component) {
+	function connectToMessageContainer(Component) {
 	  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	
 	  var _ref$methods = _ref.methods;
@@ -21169,7 +21170,7 @@
 	      return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
 	    }
 	
-	    MessageListener.prototype.componentWillMount = function componentWillMount() {
+	    MessageListener.prototype.componentDidMount = function componentDidMount() {
 	      var _this2 = this;
 	
 	      var container = this.context.messageContainer;
@@ -21245,8 +21246,11 @@
 	  });
 	
 	  return MessageListener;
-	};
+	}
 	
+	connectToMessageContainer.resolveNames = defaultResolveNames;
+	
+	exports.default = connectToMessageContainer;
 	module.exports = exports['default'];
 
 /***/ },
@@ -21278,6 +21282,8 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var stringOrArrayOfStrings = _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.arrayOf(_react.PropTypes.string)]);
+	
+	var resolveNames = _connectToMessageContainer2.default.resolveNames;
 	
 	var MessageTrigger = function (_React$Component) {
 	  _inherits(MessageTrigger, _React$Component);
@@ -21313,11 +21319,10 @@
 	    return _react2.default.createElement(
 	      _ChildBridge2.default,
 	      {
-	        inject: this.inject,
 	        events: this.props.events,
 	        onEvent: this.onEvent
 	      },
-	      this.props.children
+	      this.inject
 	    );
 	  };
 	
@@ -21354,16 +21359,20 @@
 	
 	MessageTrigger.propTypes = {
 	  events: stringOrArrayOfStrings,
-	  inject: _react2.default.PropTypes.func,
 	
 	  for: stringOrArrayOfStrings,
 	
+	  children: _react2.default.PropTypes.oneOfType([_react2.default.PropTypes.func, _react2.default.PropTypes.element]),
+	
 	  group: function group(props, name, compName) {
+	    for (var _len2 = arguments.length, args = Array(_len2 > 3 ? _len2 - 3 : 0), _key2 = 3; _key2 < _len2; _key2++) {
+	      args[_key2 - 3] = arguments[_key2];
+	    }
+	
 	    if (!props[name] && (!props.for || !props.for.length)) {
 	      return new Error('A `group` prop is required when no `for` prop is provided' + ('for component ' + compName));
 	    }
-	
-	    return stringOrArrayOfStrings(props, name, compName);
+	    return stringOrArrayOfStrings.apply(undefined, [props, name, compName].concat(args));
 	  }
 	};
 	MessageTrigger.contextTypes = {
@@ -21376,30 +21385,38 @@
 	var _initialiseProps = function _initialiseProps() {
 	  var _this2 = this;
 	
-	  this.onEvent = function (event, handler) {
-	    for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-	      args[_key2 - 2] = arguments[_key2];
+	  this.onEvent = function (event) {
+	    for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+	      args[_key3 - 1] = arguments[_key3];
 	    }
 	
+	    var _props = _this2.props;
+	    var onValidate = _props.onValidate;
+	    var children = _props.children;
 	    var messageContainer = _this2.context.messageContainer;
 	
+	    var handler = _react2.default.isValidElement(children) && children.props[event];
 	
 	    handler && handler.apply(_this2, args);
 	
 	    if (!messageContainer) return;
 	
-	    messageContainer.onValidate(_this2.resolveNames(), event, args);
+	    onValidate = onValidate || messageContainer.onValidate;
+	
+	    onValidate(resolveNames(_this2.props, messageContainer), event, args);
 	  };
 	
-	  this.inject = function (child) {
-	    var _props = _this2.props;
-	    var messages = _props.messages;
-	    var inject = _props.inject;
+	  this.inject = function (props) {
+	    var _props2 = _this2.props;
+	    var messages = _props2.messages;
+	    var children = _props2.children;
 	
 	
-	    if (!inject) return false;
+	    props.messages = messages;
 	
-	    return inject(child, messages);
+	    if (typeof children === 'function') return children(props);
+	
+	    return _react2.default.cloneElement(children, props);
 	  };
 	};
 	
@@ -21437,47 +21454,55 @@
 	    _React$Component.apply(this, arguments);
 	  }
 	
-	  ChildBridge.prototype.render = function render() {
-	    var _this = this;
-	
-	    var _props = this.props;
-	    var inject = _props.inject;
-	    var child = _props.children;
-	
-	    var create = function create(element) {
-	      return _react.cloneElement(_react2['default'].Children.only(element), _extends({}, inject(element), _this.events(element)));
-	    };
-	
-	    if (typeof child === 'function') return child(create);
-	
-	    return create(child);
+	  ChildBridge.prototype.componentWillMount = function componentWillMount() {
+	    this.events = {};
+	    this.processEvents(this.props.events);
 	  };
 	
-	  ChildBridge.prototype.events = function events(child) {
-	    var _this2 = this;
+	  ChildBridge.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
+	    this.processEvents(nextProps.events);
+	  };
 	
-	    var _props2 = this.props;
-	    var events = _props2.events;
-	    var onEvent = _props2.onEvent;
+	  ChildBridge.prototype.processEvents = function processEvents(events) {
+	    var _this = this;
 	
-	    if (events == null) {
-	      return null;
-	    }
+	    [].concat(events).forEach(function (event) {
+	      _this.events[event] = _this.events[event] || function () {
+	        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	          args[_key] = arguments[_key];
+	        }
 	
-	    events = [].concat(events);
+	        return _this.handleEvent(event, args);
+	      };
+	    });
+	  };
 	
-	    return events.reduce(function (map, event) {
-	      map[event] = onEvent.bind(_this2, event, child.props[event]);
-	      return map;
-	    }, {});
+	  ChildBridge.prototype.handleEvent = function handleEvent(event, args) {
+	    var _props;
+	
+	    (_props = this.props).onEvent.apply(_props, [event].concat(args));
+	  };
+	
+	  ChildBridge.prototype.render = function render() {
+	    var child = this.props.children;
+	
+	    if (!child) return null;
+	
+	    return child(_extends({}, this.events));
 	  };
 	
 	  _createClass(ChildBridge, null, [{
 	    key: 'propTypes',
 	    value: {
 	      events: _react.PropTypes.oneOfType([_react.PropTypes.array, _react.PropTypes.string]),
-	      onEvent: _react.PropTypes.func.isRequired,
-	      inject: _react.PropTypes.func.isRequired
+	      children: _react.PropTypes.func,
+	      onEvent: _react.PropTypes.func.isRequired
+	    },
+	    enumerable: true
+	  }, {
+	    key: 'defaultProps',
+	    value: {
+	      events: []
 	    },
 	    enumerable: true
 	  }]);
