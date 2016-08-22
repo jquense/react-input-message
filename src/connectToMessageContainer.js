@@ -31,11 +31,11 @@ function defaultMapMessages(messages, names) {
 }
 
 
-export default (Component, {
+function connectToMessageContainer(Component, {
   methods = [],
   mapMessages = defaultMapMessages,
   resolveNames = defaultResolveNames,
-} = {}) => {
+} = {}) {
 
   function resolveNamesAndMapMessages(messages, props, container) {
     let names = resolveNames ? resolveNames(props, container) : [];
@@ -60,7 +60,7 @@ export default (Component, {
       messageContainer: React.PropTypes.object,
     }
 
-    componentWillMount() {
+    componentDidMount() {
       let container = this.context.messageContainer;
 
       if (container) {
@@ -124,3 +124,7 @@ export default (Component, {
 
   return MessageListener;
 }
+
+connectToMessageContainer.resolveNames = defaultResolveNames;
+
+export default connectToMessageContainer;

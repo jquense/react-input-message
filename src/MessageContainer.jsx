@@ -1,4 +1,5 @@
 import React from 'react';
+
 import connectToMessageContainer from './connectToMessageContainer';
 
 let uniq = array => array.filter((item, idx) => array.indexOf(item) === idx);
@@ -99,6 +100,7 @@ class MessageContainer extends React.Component {
         type,
         args
       )
+      return;
     }
 
     this.props.onValidationNeeded &&

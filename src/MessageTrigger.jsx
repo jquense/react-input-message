@@ -7,24 +7,28 @@ let stringOrArrayOfStrings = PropTypes.oneOfType([
   PropTypes.arrayOf(PropTypes.string)
 ]);
 
+let { resolveNames } = connectToMessageContainer;
 
-class MessageTrigger extends React.Component{
+class MessageTrigger extends React.Component {
 
   static propTypes = {
     events: stringOrArrayOfStrings,
-    inject: React.PropTypes.func,
 
     for: stringOrArrayOfStrings,
 
-    group: (props, name, compName) => {
+    children: React.PropTypes.oneOfType([
+      React.PropTypes.func,
+      React.PropTypes.element
+    ]),
+
+    group: (props, name, compName, ...args) => {
       if (!props[name] && (!props.for || !props.for.length)) {
         return new Error(
           'A `group` prop is required when no `for` prop is provided' +
           `for component ${compName}`
         )
       }
-
-      return stringOrArrayOfStrings(props, name, compName);
+      return stringOrArrayOfStrings(props, name, compName, ...args);
     }
   }
 
@@ -57,38 +61,42 @@ class MessageTrigger extends React.Component{
   render() {
     return (
       <Bridge
-        inject={this.inject}
         events={this.props.events}
         onEvent={this.onEvent}
       >
-        {this.props.children}
+        {this.inject}
       </Bridge>
     )
   }
 
-  onEvent = (event, handler, ...args) => {
+  onEvent = (event, ...args) => {
+    let { onValidate, children } = this.props
     let { messageContainer } = this.context;
+    let handler = React.isValidElement(children) && children.props[event]
 
-    handler && handler.apply(this, args)
+    handler &&
+      handler.apply(this, args)
 
     if (!messageContainer) return
 
-    messageContainer.onValidate(
-        this.resolveNames()
+    onValidate = onValidate || messageContainer.onValidate
+
+    onValidate(
+        resolveNames(this.props, messageContainer)
       , event
       , args
     );
   }
 
-  inject = (child) => {
-    let { messages, inject } = this.props;
+  inject = (props) => {
+    let { messages, children } = this.props;
 
-    if (!inject) return false
+    props.messages = messages
 
-    return inject(
-      child,
-      messages
-    )
+    if (typeof children === 'function')
+      return children(props)
+
+    return React.cloneElement(children, props)
   }
 
   addToGroup(props = this.props, context = this.context){

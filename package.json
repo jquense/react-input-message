@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "classnames": "^2.2.3",
-    "topeka": "^0.3.0",
+    "topeka": "^0.4.0",
     "universal-promise": "^1.1.0"
   },
   "peerDependencies": {

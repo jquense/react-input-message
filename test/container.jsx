@@ -82,8 +82,7 @@ describe('Container', function(){
       outerSpy.should.have.been.calledOnce;
       outerSpy.getCall(0).args[0].fields.should.eql(['first']);
 
-      innerSpy.should.have.been.calledOnce;
-      innerSpy.getCall(0).args[0].fields.should.eql(['first']);
+      innerSpy.should.not.have.been.called;
     })
 
     it('should only surface passthrough containers', () => {
@@ -138,14 +137,12 @@ describe('Container', function(){
 
     it('should map names between containers', () => {
       let outerSpy = sinon.spy();
-      let innerSpy = sinon.spy();
 
       tsp(
         <MessageContainer onValidationNeeded={outerSpy}>
           <div>
             <MessageContainer
               passthrough
-              onValidationNeeded={innerSpy}
               mapNames={(names) => names.map(name => `names.${name}`)}
             >
               <div>
@@ -163,9 +160,6 @@ describe('Container', function(){
 
       outerSpy.getCall(0).args[0].fields
         .should.eql(['names.first']);
-
-      innerSpy.getCall(0).args[0].fields
-        .should.eql(['first']);
     })
 
     it('should prefer message prop to context', () => {
