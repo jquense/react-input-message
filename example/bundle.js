@@ -21104,6 +21104,7 @@
 	'use strict';
 	
 	exports.__esModule = true;
+	exports.resolveNames = undefined;
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
@@ -21170,7 +21171,7 @@
 	      return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
 	    }
 	
-	    MessageListener.prototype.componentDidMount = function componentDidMount() {
+	    MessageListener.prototype.componentWillMount = function componentWillMount() {
 	      var _this2 = this;
 	
 	      var container = this.context.messageContainer;
@@ -21212,7 +21213,8 @@
 	    MessageListener.prototype.render = function render() {
 	      var _ref3 = this.state || {};
 	
-	      var messages = _ref3.messages;
+	      var _ref3$messages = _ref3.messages;
+	      var messages = _ref3$messages === undefined ? {} : _ref3$messages;
 	
 	
 	      if (this.props.messages) {
@@ -21250,8 +21252,8 @@
 	
 	connectToMessageContainer.resolveNames = defaultResolveNames;
 	
+	exports.resolveNames = defaultResolveNames;
 	exports.default = connectToMessageContainer;
-	module.exports = exports['default'];
 
 /***/ },
 /* 168 */
@@ -21282,8 +21284,6 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var stringOrArrayOfStrings = _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.arrayOf(_react.PropTypes.string)]);
-	
-	var resolveNames = _connectToMessageContainer2.default.resolveNames;
 	
 	var MessageTrigger = function (_React$Component) {
 	  _inherits(MessageTrigger, _React$Component);
@@ -21344,20 +21344,16 @@
 	  MessageTrigger.prototype.resolveNames = function resolveNames() {
 	    var props = arguments.length <= 0 || arguments[0] === undefined ? this.props : arguments[0];
 	    var context = arguments.length <= 1 || arguments[1] === undefined ? this.context : arguments[1];
-	    var messageContainer = context.messageContainer;
-	    var forNames = props['for'];
-	    var group = props.group;
 	
-	
-	    if (!forNames && messageContainer) forNames = messageContainer.namesForGroup(group);
-	
-	    return forNames ? [].concat(forNames) : [];
+	    return (0, _connectToMessageContainer.resolveNames)(this.props, context.messageContainer);
 	  };
 	
 	  return MessageTrigger;
 	}(_react2.default.Component);
 	
 	MessageTrigger.propTypes = {
+	  noValidate: _react2.default.PropTypes.bool.isRequired,
+	
 	  events: stringOrArrayOfStrings,
 	
 	  for: stringOrArrayOfStrings,
@@ -21379,7 +21375,8 @@
 	  messageContainer: _react2.default.PropTypes.object
 	};
 	MessageTrigger.defaultProps = {
-	  events: 'onChange'
+	  events: 'onChange',
+	  noValidate: false
 	};
 	
 	var _initialiseProps = function _initialiseProps() {
@@ -21391,19 +21388,17 @@
 	    }
 	
 	    var _props = _this2.props;
-	    var onValidate = _props.onValidate;
 	    var children = _props.children;
+	    var noValidate = _props.noValidate;
 	    var messageContainer = _this2.context.messageContainer;
 	
 	    var handler = _react2.default.isValidElement(children) && children.props[event];
 	
 	    handler && handler.apply(_this2, args);
 	
-	    if (!messageContainer) return;
+	    if (noValidate || !messageContainer) return;
 	
-	    onValidate = onValidate || messageContainer.onValidate;
-	
-	    onValidate(resolveNames(_this2.props, messageContainer), event, args);
+	    messageContainer.onValidate(_this2.resolveNames(), event, args);
 	  };
 	
 	  this.inject = function (props) {
