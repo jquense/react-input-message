@@ -1,17 +1,17 @@
 import React, { PropTypes } from 'react';
 import Bridge from 'topeka/ChildBridge';
-import connectToMessageContainer from './connectToMessageContainer';
+import connectToMessageContainer, { resolveNames } from './connectToMessageContainer';
 
 let stringOrArrayOfStrings = PropTypes.oneOfType([
   PropTypes.string,
   PropTypes.arrayOf(PropTypes.string)
 ]);
 
-let { resolveNames } = connectToMessageContainer;
-
 class MessageTrigger extends React.Component {
 
   static propTypes = {
+    noValidate: React.PropTypes.bool.isRequired,
+
     events: stringOrArrayOfStrings,
 
     for: stringOrArrayOfStrings,
@@ -38,6 +38,7 @@ class MessageTrigger extends React.Component {
 
   static defaultProps = {
     events: 'onChange',
+    noValidate: false,
   }
 
   constructor(...args) {
@@ -70,19 +71,17 @@ class MessageTrigger extends React.Component {
   }
 
   onEvent = (event, ...args) => {
-    let { onValidate, children } = this.props
+    let { children, noValidate } = this.props
     let { messageContainer } = this.context;
     let handler = React.isValidElement(children) && children.props[event]
 
     handler &&
       handler.apply(this, args)
 
-    if (!messageContainer) return
+    if (noValidate || !messageContainer) return
 
-    onValidate = onValidate || messageContainer.onValidate
-
-    onValidate(
-        resolveNames(this.props, messageContainer)
+    messageContainer.onValidate(
+        this.resolveNames()
       , event
       , args
     );
@@ -114,13 +113,7 @@ class MessageTrigger extends React.Component {
   }
 
   resolveNames(props = this.props, context = this.context) {
-    let { messageContainer } = context;
-    let { 'for': forNames, group } = props;
-
-    if (!forNames && messageContainer)
-      forNames = messageContainer.namesForGroup(group);
-
-    return forNames ? [].concat(forNames) : [];
+    return resolveNames(this.props, context.messageContainer)
   }
 }
 

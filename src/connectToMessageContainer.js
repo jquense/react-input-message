@@ -60,7 +60,7 @@ function connectToMessageContainer(Component, {
       messageContainer: React.PropTypes.object,
     }
 
-    componentDidMount() {
+    componentWillMount() {
       let container = this.context.messageContainer;
 
       if (container) {
@@ -126,5 +126,7 @@ function connectToMessageContainer(Component, {
 }
 
 connectToMessageContainer.resolveNames = defaultResolveNames;
+
+export { defaultResolveNames as resolveNames }
 
 export default connectToMessageContainer;
