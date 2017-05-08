@@ -35,6 +35,7 @@ class Message extends React.Component {
     let {
       /* eslint-disable no-unused-vars */
         for: fieldFor
+        , group
       /* eslint-enable no-unused-vars */
       , messages
       , component: Component
