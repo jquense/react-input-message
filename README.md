@@ -16,6 +16,9 @@ specific validation or data schema library.
 npm i -S react-input-message
 ```
 
+**Depends on the `Promise` global object** Most browsers and versions of node
+already support this but for lder browsers please provide a polyfill
+
 ## Use
 
 You render your inputs as you normally would, except that you wrap them inside a `MessageTrigger`

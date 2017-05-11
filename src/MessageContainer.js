@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import connectToMessageContainer from './connectToMessageContainer';
@@ -13,10 +14,10 @@ const ALL_FIELDS = '@all';
 class MessageContainer extends React.Component {
 
   static propTypes = {
-    passthrough: React.PropTypes.bool,
-    mapNames: React.PropTypes.func,
-    messages: React.PropTypes.object,
-    onValidationNeeded: React.PropTypes.func
+    passthrough: PropTypes.bool,
+    mapNames: PropTypes.func,
+    messages: PropTypes.object,
+    onValidationNeeded: PropTypes.func
   }
 
   static defaultProps = {
@@ -25,11 +26,11 @@ class MessageContainer extends React.Component {
   }
 
   static contextTypes = {
-    messageContainer: React.PropTypes.object,
+    messageContainer: PropTypes.object,
   }
 
   static childContextTypes = {
-    messageContainer: React.PropTypes.object,
+    messageContainer: PropTypes.object,
   }
 
   constructor(...args) {

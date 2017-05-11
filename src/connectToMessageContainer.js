@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 
 function isReactComponent(component) {
@@ -53,11 +54,11 @@ function connectToMessageContainer(Component, {
     static DecoratedComponent = Component
 
     static propTypes = {
-      mapMessages: React.PropTypes.func,
+      mapMessages: PropTypes.func,
     }
 
     static contextTypes = {
-      messageContainer: React.PropTypes.object,
+      messageContainer: PropTypes.object,
     }
 
     componentWillMount() {

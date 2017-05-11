@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import Bridge from 'topeka/ChildBridge';
 import connectToMessageContainer, { resolveNames } from './connectToMessageContainer';
 
@@ -10,15 +11,15 @@ let stringOrArrayOfStrings = PropTypes.oneOfType([
 class MessageTrigger extends React.Component {
 
   static propTypes = {
-    noValidate: React.PropTypes.bool.isRequired,
+    noValidate: PropTypes.bool.isRequired,
 
     events: stringOrArrayOfStrings,
 
     for: stringOrArrayOfStrings,
 
-    children: React.PropTypes.oneOfType([
-      React.PropTypes.func,
-      React.PropTypes.element
+    children: PropTypes.oneOfType([
+      PropTypes.func,
+      PropTypes.element
     ]),
 
     group: (props, name, compName, ...args) => {
@@ -33,7 +34,7 @@ class MessageTrigger extends React.Component {
   }
 
   static contextTypes = {
-    messageContainer: React.PropTypes.object,
+    messageContainer: PropTypes.object,
   }
 
   static defaultProps = {

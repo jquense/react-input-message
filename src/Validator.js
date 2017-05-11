@@ -1,5 +1,3 @@
-import Promise from 'universal-promise';
-
 class Validator {
 
   constructor(validate){

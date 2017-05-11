@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import connectToMessageContainer from './connectToMessageContainer';
 
 let values = obj => Object.keys(obj).map( k => obj[k] )
@@ -28,7 +29,7 @@ class Message extends React.Component {
   }
 
   static contextTypes = {
-    messageContainer: React.PropTypes.object,
+    messageContainer: PropTypes.object,
   }
 
   render() {
