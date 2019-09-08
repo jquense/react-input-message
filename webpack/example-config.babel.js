@@ -1,19 +1,27 @@
-import path from 'path'
+const path = require('path')
 
-export default {
-  devtool: 'source-map',
-  entry: './example/input-validator-example.jsx',
+module.exports = {
+  entry: path.join(__dirname, '../example/input-validator-example.jsx'),
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, '../example')
+    path: path.resolve(__dirname, '../example'),
+    publicPath: '/'
   },
+  devServer: {
+    contentBase: [path.join(__dirname, '../example')],
+    historyApiFallback: true,
+    hot: true
+},
 
   resolve: {
-    extensions: ['', '.js', '.jsx']
+    alias: {
+      'react-input-messages': path.join(__dirname, '../src')
+    },
+    extensions: ['.js', '.jsx']
   },
 
   module: {
-    loaders: [
+    rules: [
       { test: /\.css$/,  loader: "style-loader!css-loader" },
       { test: /\.less$/, loader: "style-loader!css-loader!less-loader" },
       {

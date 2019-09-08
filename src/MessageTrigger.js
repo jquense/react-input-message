@@ -47,11 +47,11 @@ class MessageTrigger extends React.Component {
     this.state = { isActive: false }
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.addToGroup();
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
+  UNSAFE_componentWillReceiveProps(nextProps, nextContext) {
     this.addToGroup(nextProps, nextContext);
   }
 

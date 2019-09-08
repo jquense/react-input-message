@@ -1,22 +1,8 @@
-'use strict';
-var React = require('react')
-var Promise = require('promise/lib/es6-extensions')
-var Validator = require('../src/Validator')
-var MessageContainer = require('../src/MessageContainer.jsx')
-var MessageTrigger = require('../src/MessageTrigger.jsx')
-var Message = require('../src/Message.jsx')
-var connectToMessageContainer = require('../src/connectToMessageContainer')
-var RW = require('react-widgets')
-var cn = require('classnames');
-
-require('react-widgets/lib/localizers/globalize')(
-  require('globalize')
-)
-/*
- *  This a simple example showing how you can hook up validation based on specified rules (the traditional way)
- *  To do this we are going to use `node-validator` as the validation engine.
- */
-var validator = require('validator')
+import React from 'react'
+import ReactDOM from 'react-dom'
+import validator from 'validator'
+import Validator from 'react-input-messages/validator'
+import { MessageContainer, MessageTrigger, Message } from 'react-input-messages'
 
 // module allows for deep property access via a string path: "foo.bar['baz']"
 var getter = require('property-expr').getter
@@ -146,9 +132,10 @@ class App extends React.Component {
                 <div className='col-sm-8'>
 
                   <MessageTrigger for='personal.birthday' group='personal'>
-                    <RW.DateTimePicker time={false} format='d'
+                      <input type="text" name="bday"
                       value={model.personal.birthday}
-                      onChange={createHandler('personal.birthday')}/>
+                      onChange={createHandler('personal.birthday')}
+                      />
                   </MessageTrigger>
 
                   <Message for='personal.birthday' className='form-message'/>
@@ -166,10 +153,10 @@ class App extends React.Component {
                 <label className='control-label col-sm-3'>favorite number</label>
                 <div className='col-sm-8'>
                   <MessageTrigger for='trivia.favNumber'>
-                    <RW.NumberPicker
+                  <input type="text" name="bday"
                       value={model.trivia.favNumber}
                       onChange={createHandler('trivia.favNumber')}
-                    />
+                      />
                   </MessageTrigger>
                   <Message for='trivia.favNumber' className='form-message'/>
                 </div>
@@ -187,4 +174,4 @@ class App extends React.Component {
   }
 }
 
-React.render(<App/>, document.body);
+ReactDOM.render(<App/>, document.body);
