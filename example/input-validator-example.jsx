@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import validator from 'validator'
-import Validator from 'react-input-messages/validator'
+import V from 'react-input-messages/validator'
 import { MessageContainer, MessageTrigger, Message } from 'react-input-messages'
 
 // module allows for deep property access via a string path: "foo.bar['baz']"
@@ -49,7 +49,7 @@ class App extends React.Component {
     }
 
     // This is the callback used by the validator component
-    this.validator = new Validator(name => {
+    this.validator = new V(name => {
       var validations = rules[name] || []
         , value = getter(name)(this.state)
         , error;

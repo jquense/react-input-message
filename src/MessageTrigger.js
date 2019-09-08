@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import Bridge from 'topeka/ChildBridge';
+import Bridge from './ChildBridge';
 import connectToMessageContainer, { resolveNames } from './connectToMessageContainer';
 
 let stringOrArrayOfStrings = PropTypes.oneOfType([
