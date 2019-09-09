@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import Bridge from 'topeka/ChildBridge';
+import Bridge from './ChildBridge';
 import connectToMessageContainer, { resolveNames } from './connectToMessageContainer';
 
 let stringOrArrayOfStrings = PropTypes.oneOfType([
@@ -47,11 +47,11 @@ class MessageTrigger extends React.Component {
     this.state = { isActive: false }
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.addToGroup();
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
+  UNSAFE_componentWillReceiveProps(nextProps, nextContext) {
     this.addToGroup(nextProps, nextContext);
   }
 

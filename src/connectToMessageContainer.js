@@ -61,7 +61,7 @@ function connectToMessageContainer(Component, {
       messageContainer: PropTypes.object,
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
       let container = this.context.messageContainer;
 
       if (container) {
@@ -80,7 +80,7 @@ function connectToMessageContainer(Component, {
       }
     }
 
-    componentWillReceiveProps(nextProps, nextContext) {
+    UNSAFE_componentWillReceiveProps(nextProps, nextContext) {
       if (mapMessages && mapMessages.length >= 2) {
         let container = nextContext.messageContainer;
         // callback style because the listener may have been called before

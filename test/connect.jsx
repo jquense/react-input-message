@@ -1,51 +1,35 @@
-import React from 'react';
-import $ from 'teaspoon';
+import React from 'react'
+import { render } from '@testing-library/react'
+import { MessageContainer, MessageTrigger, Message } from '../src'
 
-let {
-    MessageContainer
-  , MessageTrigger
-  , Message } = require('../src');
-
-
-describe('Message', ()=>{
-
-  it('should use the prop Component', function(){
-    var inst = $(
+describe('Message', () => {
+  it('should use the prop Component', function () {
+    const { container } = render(
       <MessageContainer messages={{ fieldA: 'hi', fieldB: 'good day' }} >
-        <div>
-          <Message for='fieldA' className='msg' component='p'/>
-        </div>
+        <Message for='fieldA' className='msg' component='p' />
       </MessageContainer>)
-
-    inst.render().single('p')
+    expect(container.innerHTML).toEqual('<p class="msg">hi</p>')
   })
 
-  it('should allow empty `for`', function(){
-    var inst = $(
-      <MessageContainer messages={{ fieldA: 'hi', fieldB: 'good day' }} >
-        <div>
-          <Message className='msg'/>
-        </div>
+  it('should allow empty `for`', function () {
+    let instance
+    render(
+      <MessageContainer ref={ref => instance = ref} messages={{ fieldA: 'hi', fieldB: 'good day' }} >
+        <Message className='msg' />
       </MessageContainer>)
-
-    var messages = inst.render().single(Message._Message)[0];
-
-    messages.props.messages.should.eql({ fieldA: 'hi', fieldB: 'good day' })
+    expect(instance.props.messages).toEqual({ fieldA: 'hi', fieldB: 'good day' })
   })
 
-  it('should allow group summaries', function(){
-    var inst = $(
+  it('should allow group summaries', function () {
+    const { getByLabelText, container } = render(
       <MessageContainer messages={{ fieldA: ['foo', 'hi'], fieldB: 'good day' }} >
-        <div>
-          <MessageTrigger for='fieldA' group='test'>
-            <input/>
-          </MessageTrigger>
-          <Message group='test' className='msg'/>
-        </div>
+        <MessageTrigger for='fieldA' group='test'>
+          <input />
+        </MessageTrigger>
+        <label>
+          <Message group='test' className='msg' />
+        </label>
       </MessageContainer>)
-
-    var messages = inst.render().single(Message._Message)[0];
-
-    messages.props.messages.should.eql({ fieldA: ['foo', 'hi'] })
+    expect(getByLabelText('foo, hi')).toBeTruthy()
   })
 })

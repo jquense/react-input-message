@@ -1,15 +1,16 @@
-'use strict';
+'use strict'
 
-module.exports = {
-  
-  Validator: require('./Validator'),
+import Validator from './Validator'
+import MessageContainer from './MessageContainer'
+import MessageTrigger from './MessageTrigger'
+import Message from './Message'
+import connectToMessageContainer from './connectToMessageContainer'
 
-  MessageContainer: require('./MessageContainer'),
-
-  MessageTrigger:  require('./MessageTrigger'),
-
-  Message: require('./Message'),
-
-  connectToMessageContainer:  require('./connectToMessageContainer')
+export {
+  Validator,
+  MessageContainer,
+  MessageTrigger,
+  Message,
+  connectToMessageContainer
 }
 

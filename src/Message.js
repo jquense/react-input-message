@@ -58,5 +58,5 @@ class Message extends React.Component {
   }
 }
 
-module.exports = connectToMessageContainer(Message)
-module.exports._Message = Message
+export default connectToMessageContainer(Message)
+connectToMessageContainer._Message = Message

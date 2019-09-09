@@ -39,7 +39,7 @@ class MessageContainer extends React.Component {
     this._groups = Object.create(null)
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this._emit(nextProps)
   }
 
